@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { blogPosts, type BlogPost } from '../data/blog';
 import { ArrowLeft, Clock, Calendar } from 'lucide-react';
+import { renderMarkdown } from './markdownHelpers';
 import './BlogLayout.css';
 
 interface BlogLayoutProps {
@@ -54,21 +55,7 @@ export const BlogLayout = ({ onBack }: BlogLayoutProps) => {
             </header>
 
             <div className="article-content-body">
-              {selectedPost.content.split('\n\n').map((paragraph, index) => {
-                if (paragraph.startsWith('### ')) {
-                  return <h3 key={index}>{paragraph.replace('### ', '')}</h3>;
-                }
-                if (paragraph.startsWith('*   ')) {
-                  return (
-                    <ul key={index}>
-                      {paragraph.split('\n').map((li, i) => (
-                        <li key={i}>{li.replace('*   ', '').replace('- ', '')}</li>
-                      ))}
-                    </ul>
-                  );
-                }
-                return <p key={index}>{paragraph}</p>;
-              })}
+              {renderMarkdown(selectedPost.content)}
             </div>
           </article>
         </main>

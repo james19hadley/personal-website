@@ -1,6 +1,7 @@
 import { type Command } from './types';
 import { projects } from '../../data/projects';
 import { blogPosts } from '../../data/blog';
+import { renderMarkdown } from '../markdownHelpers';
 
 export const infoCommands: { [key: string]: Command } = {
   whoami: {
@@ -92,12 +93,7 @@ export const infoCommands: { [key: string]: Command } = {
               <p className="article-title">{post.title}</p>
               <p className="article-meta">Date: {post.date} | Read time: {post.readTime} | Category: {post.category}</p>
               <div className="article-body">
-                {post.content.split('\n\n').map((para, i) => {
-                  if (para.startsWith('### ')) {
-                    return <p key={i} className="body-heading">{para.replace('### ', '')}</p>;
-                  }
-                  return <p key={i} className="body-paragraph">{para}</p>;
-                })}
+                {renderMarkdown(post.content)}
               </div>
             </div>
           );
