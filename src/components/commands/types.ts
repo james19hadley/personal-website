@@ -21,6 +21,7 @@ export interface CommandContext {
   startCMatrix: () => void;
   openVimEditor: (filename: string) => void;
   toggleFullscreen?: () => void;
+  runCommand?: (cmd: string) => void;
 }
 
 export interface Command {

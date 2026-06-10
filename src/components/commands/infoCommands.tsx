@@ -129,5 +129,117 @@ export const infoCommands: { [key: string]: Command } = {
         </div>
       </div>
     )
+  },
+  search: {
+    name: 'search',
+    description: 'Search across projects, blog posts, and virtual files',
+    execute: ({ args, wasmModule, runCommand }) => {
+      const q = args.join(' ').trim().toLowerCase();
+      if (!q) {
+        return <p className="error-text">Usage: search &lt;query&gt;</p>;
+      }
+
+      // 1. Filter Projects
+      const matchedProjects = projects.filter(p => 
+        p.title.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.techStack.some(t => t.toLowerCase().includes(q))
+      );
+
+      // 2. Filter Blog Posts
+      const matchedBlogs = blogPosts.filter(b => 
+        b.title.toLowerCase().includes(q) ||
+        b.category.toLowerCase().includes(q) ||
+        b.content.toLowerCase().includes(q)
+      );
+
+      // 3. Filter Virtual Files
+      let vfsFiles: { path: string; content?: string }[] = [];
+      if (wasmModule) {
+        try {
+          const stateStr = wasmModule.cwrap('serialize_fs', 'string', [])();
+          const items = JSON.parse(stateStr || '[]');
+          if (Array.isArray(items)) {
+            vfsFiles = items.filter((item: any) => item.type === 'F');
+          }
+        } catch {}
+      }
+
+      const matchedFiles = vfsFiles.filter(f => 
+        f.path.toLowerCase().includes(q) ||
+        (f.content && f.content.toLowerCase().includes(q))
+      );
+
+      if (matchedProjects.length === 0 && matchedBlogs.length === 0 && matchedFiles.length === 0) {
+        return <p className="error-text">No matches found for "{q}" across projects, blog posts, or files.</p>;
+      }
+
+      return (
+        <div className="cmd-output-search">
+          <p className="section-title">Search Results for "{q}":</p>
+          
+          {matchedProjects.length > 0 && (
+            <div className="search-group" style={{ marginBottom: '10px' }}>
+              <p className="highlight font-bold" style={{ color: 'var(--accent-cyan)' }}>Projects:</p>
+              <ul className="help-list" style={{ paddingLeft: '14px', listStyleType: 'square' }}>
+                {matchedProjects.map(p => (
+                  <li key={p.id}>
+                    {p.githubUrl ? (
+                      <a href={p.githubUrl} target="_blank" rel="noopener noreferrer" className="term-link">
+                        {p.title}
+                      </a>
+                    ) : (
+                      <span className="highlight">{p.title}</span>
+                    )}{' '}
+                    - {p.description.slice(0, 75)}...
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {matchedBlogs.length > 0 && (
+            <div className="search-group" style={{ marginBottom: '10px' }}>
+              <p className="highlight font-bold" style={{ color: 'var(--accent-cyan)' }}>Blog Entries:</p>
+              <ul className="help-list" style={{ paddingLeft: '14px', listStyleType: 'square' }}>
+                {matchedBlogs.map(b => (
+                  <li key={b.id}>
+                    <button onClick={() => runCommand?.(`blog read ${b.id}`)} className="term-link-btn">
+                      blog read {b.id}
+                    </button>{' '}
+                    - {b.title}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {matchedFiles.length > 0 && (
+            <div className="search-group">
+              <p className="highlight font-bold" style={{ color: 'var(--accent-cyan)' }}>Virtual Files:</p>
+              <ul className="help-list" style={{ paddingLeft: '14px', listStyleType: 'square' }}>
+                {matchedFiles.map(f => (
+                  <li key={f.path}>
+                    <button onClick={() => runCommand?.(`cat ${f.path}`)} className="term-link-btn">
+                      {f.path}
+                    </button>
+                    {' '}(
+                    <button onClick={() => runCommand?.(`vim ${f.path}`)} className="term-link-btn" style={{ fontSize: '0.8rem' }}>
+                      edit
+                    </button>
+                    )
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      );
+    }
+  },
+  find: {
+    name: 'find',
+    description: 'Search across projects, blog posts, and virtual files',
+    execute: (ctx) => infoCommands.search.execute(ctx)
   }
 };

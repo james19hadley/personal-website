@@ -167,5 +167,86 @@ zijh-vfs        ${totalMb} MB     ${usedMb} MB     ${freeMb} MB     ${usePercent
         return <p className="error-text">Failed to fetch disk usage: {err.message || String(err)}</p>;
       }
     }
+  },
+  gist: {
+    name: 'gist',
+    description: 'Fetch and import files from a public GitHub Gist into the virtual filesystem',
+    execute: ({ args, wasmModule, currentPwd, setHistory }) => {
+      const gistId = args[0];
+      if (!gistId) {
+        return <p className="error-text">Usage: gist &lt;gist_id&gt;</p>;
+      }
+
+      if (!wasmModule) {
+        return <p className="error-text">Wasm module not loaded.</p>;
+      }
+
+      fetch(`https://api.github.com/gists/${gistId}`)
+        .then(res => {
+          if (!res.ok) throw new Error(`GitHub API returned status ${res.status}`);
+          return res.json();
+        })
+        .then(data => {
+          const files = data.files;
+          if (!files || Object.keys(files).length === 0) {
+            throw new Error('No files found in this Gist.');
+          }
+
+          const fileNames = Object.keys(files);
+          let successCount = 0;
+          const logOutputs: string[] = [];
+
+          for (const name of fileNames) {
+            const fileData = files[name];
+            const content = fileData.content || '';
+            const size = new Blob([content]).size;
+            
+            const MAX_SIZE = 500 * 1024;
+            if (size > MAX_SIZE) {
+              logOutputs.push(`File "${name}" exceeds 500 KB limit and was skipped.`);
+              continue;
+            }
+
+            const absolutePath = (currentPwd === '/' ? '' : currentPwd) + '/' + name;
+            
+            try {
+              wasmModule.cwrap('write_file_raw', null, ['string', 'string'])(absolutePath, content);
+              successCount++;
+              logOutputs.push(`Imported "${name}" (${size} bytes)`);
+            } catch (err: any) {
+              logOutputs.push(`Failed to write "${name}": ${err.message || String(err)}`);
+            }
+          }
+
+          try {
+            const state = wasmModule.cwrap('serialize_fs', 'string', [])();
+            localStorage.setItem('zijh-fs-state', state);
+          } catch {}
+
+          setHistory(prev => [
+            ...prev,
+            {
+              output: (
+                <div className="gist-import-results">
+                  <p className="highlight">Gist import completed: {successCount} file(s) imported successfully.</p>
+                  <ul className="help-list" style={{ paddingLeft: '14px', listStyleType: 'circle' }}>
+                    {logOutputs.map((log, idx) => <li key={idx}>{log}</li>)}
+                  </ul>
+                </div>
+              )
+            }
+          ]);
+        })
+        .catch(err => {
+          setHistory(prev => [
+            ...prev,
+            {
+              output: <p className="error-text">Failed to import Gist "{gistId}": {err.message || String(err)}</p>
+            }
+          ]);
+        });
+
+      return <p className="morph-text">Fetching Gist "{gistId}" from GitHub API...</p>;
+    }
   }
 };

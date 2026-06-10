@@ -132,6 +132,7 @@ export const TerminalLayout = ({
         rawCommand: trimmed, args, wasmModule, currentPwd, setCurrentPwd, setHistory, toggleTheme,
         onSwitchToGui, onNavigateToGameBoy, clearHistory: () => setHistory([]), setTerminalColor,
         startCMatrix: () => setCmatrixActive(true), openVimEditor, toggleFullscreen: () => setIsMaximized(prev => !prev),
+        runCommand: handleCommandRun,
       };
       const res = commandsRegistry[command].execute(ctx);
       if (res === null && command === 'clear') {

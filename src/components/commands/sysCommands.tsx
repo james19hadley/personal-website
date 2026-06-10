@@ -17,6 +17,7 @@ export const sysCommands: { [key: string]: Command } = {
           <li><span className="cmd-name">gui</span> / <span className="cmd-name">exit</span> - Switch layout back to home view</li>
           <li><span className="cmd-name">theme</span> - Toggle light/dark UI themes</li>
           <li><span className="cmd-name">clear</span> - Reset terminal window history</li>
+          <li><span className="cmd-name">search &lt;query&gt;</span> - Search projects, blogs, and files (alias: <span className="cmd-name">find</span>)</li>
           <li><span className="cmd-name">secret</span> - Run custom system diagnostics</li>
           <li><span className="cmd-name">pokemon [garden | view &lt;name&gt;]</span> - View animated sprites or render garden inline</li>
           <li><span className="cmd-name">gameboy</span> - Launch standalone GameBoy GBA Emulator (plays FireRed)</li>
@@ -37,6 +38,7 @@ export const sysCommands: { [key: string]: Command } = {
           <li><span className="cmd-name">df</span> - Display virtual disk space usage & limits</li>
           <li><span className="cmd-name">upload</span> - Upload file from computer to current VFS directory</li>
           <li><span className="cmd-name">download &lt;path&gt;</span> - Download file from VFS to computer</li>
+          <li><span className="cmd-name">gist &lt;gist_id&gt;</span> - Import all files from a public GitHub Gist</li>
           <li><span className="cmd-name">ln -s &lt;target&gt; &lt;link&gt;</span> - Create a symbolic link</li>
         </ul>
       </div>

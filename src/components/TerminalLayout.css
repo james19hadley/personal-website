@@ -299,6 +299,22 @@
   color: var(--text-primary);
 }
 
+.term-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--accent-cyan);
+  text-decoration: underline;
+  cursor: pointer;
+  outline: none;
+}
+
+.term-link-btn:hover {
+  color: var(--text-primary);
+}
+
 /* Blog list output */
 .blog-rows {
   display: flex;

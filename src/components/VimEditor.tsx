@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { VimHighlighter } from './VimHighlighter';
 import './VimEditor.css';
 
 interface VimEditorProps {
@@ -31,6 +32,15 @@ export const VimEditor = ({ filename, initialContent, onSave, onClose }: VimEdit
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const commandInputRef = useRef<HTMLInputElement>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+    const target = e.target as HTMLTextAreaElement;
+    if (highlightRef.current) {
+      highlightRef.current.scrollTop = target.scrollTop;
+      highlightRef.current.scrollLeft = target.scrollLeft;
+    }
+  };
 
   // Sync state modifications
   useEffect(() => {
@@ -67,14 +77,9 @@ export const VimEditor = ({ filename, initialContent, onSave, onClose }: VimEdit
 
   const getIndexFromPosition = (text: string, line0: number, col0: number) => {
     const lines = text.split('\n');
-    let line = Math.max(0, Math.min(line0, lines.length - 1));
-    let col = Math.max(0, Math.min(col0, lines[line].length));
-    
-    let index = 0;
-    for (let i = 0; i < line; i++) {
-      index += lines[i].length + 1; // +1 for newline character
-    }
-    return index + col;
+    const line = Math.max(0, Math.min(line0, lines.length - 1));
+    const col = Math.max(0, Math.min(col0, lines[line].length));
+    return lines.slice(0, line).reduce((sum, l) => sum + l.length + 1, 0) + col;
   };
 
   const updateCursorInfo = (index: number) => {
@@ -96,30 +101,16 @@ export const VimEditor = ({ filename, initialContent, onSave, onClose }: VimEdit
     const lines = content.split('\n');
 
     let targetIdx = currentIdx;
-    // Vim coordinates are 1-based, we subtract 1 for array indexing
     const lineIdx = line - 1;
     const colIdx = col - 1;
 
-    if (dir === 'h') {
-      targetIdx = Math.max(0, currentIdx - 1);
-    } else if (dir === 'l') {
-      targetIdx = Math.min(content.length, currentIdx + 1);
-    } else if (dir === 'k') {
-      if (lineIdx > 0) {
-        targetIdx = getIndexFromPosition(content, lineIdx - 1, colIdx);
-      }
-    } else if (dir === 'j') {
-      if (lineIdx < lines.length - 1) {
-        targetIdx = getIndexFromPosition(content, lineIdx + 1, colIdx);
-      }
-    }
+    if (dir === 'h') targetIdx = Math.max(0, currentIdx - 1);
+    else if (dir === 'l') targetIdx = Math.min(content.length, currentIdx + 1);
+    else if (dir === 'k' && lineIdx > 0) targetIdx = getIndexFromPosition(content, lineIdx - 1, colIdx);
+    else if (dir === 'j' && lineIdx < lines.length - 1) targetIdx = getIndexFromPosition(content, lineIdx + 1, colIdx);
 
     textarea.focus();
-    // setTimeout to ensure focus is resolved before selection is set
-    setTimeout(() => {
-      textarea.setSelectionRange(targetIdx, targetIdx);
-      updateCursorInfo(targetIdx);
-    }, 0);
+    setTimeout(() => { textarea.setSelectionRange(targetIdx, targetIdx); updateCursorInfo(targetIdx); }, 0);
   };
 
   const handleGlobalKeyDown = (e: any) => {
@@ -200,11 +191,8 @@ export const VimEditor = ({ filename, initialContent, onSave, onClose }: VimEdit
         setHasUnsavedChanges(false);
         setStatusMessage(`"${filename}" written successfully`);
       } else if (cmd === 'q') {
-        if (hasUnsavedChanges) {
-          setErrorMessage('No write since last change (add ! to override)');
-        } else {
-          onClose();
-        }
+        if (hasUnsavedChanges) setErrorMessage('No write since last change (add ! to override)');
+        else onClose();
       } else if (cmd === 'wq') {
         onSave(content);
         onClose();
@@ -237,19 +225,25 @@ export const VimEditor = ({ filename, initialContent, onSave, onClose }: VimEdit
           ))}
         </div>
 
-        {/* Edit Textarea Buffer */}
-        <textarea
-          ref={textareaRef}
-          className={`vim-textarea ${mode === 'NORMAL' ? 'mode-normal' : ''}`}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          onSelect={handleTextareaSelect}
-          readOnly={mode === 'NORMAL' || mode === 'COMMAND'}
-          spellCheck="false"
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-        />
+        {/* Edit Textarea Buffer & Highlighter Overlay */}
+        <div className="vim-editor-buffer-wrapper">
+          <div ref={highlightRef} className="vim-highlight-container">
+            <VimHighlighter value={content} />
+          </div>
+          <textarea
+            ref={textareaRef}
+            className={`vim-textarea ${mode === 'NORMAL' ? 'mode-normal' : ''}`}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onSelect={handleTextareaSelect}
+            onScroll={handleScroll}
+            readOnly={mode === 'NORMAL' || mode === 'COMMAND'}
+            spellCheck="false"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+          />
+        </div>
       </div>
 
       {/* Status Bar */}
@@ -274,15 +268,7 @@ export const VimEditor = ({ filename, initialContent, onSave, onClose }: VimEdit
         {mode === 'COMMAND' ? (
           <div className="command-input-row">
             <span className="command-prefix">:</span>
-            <input
-              ref={commandInputRef}
-              type="text"
-              className="command-input"
-              value={commandText}
-              onChange={(e) => setCommandText(e.target.value)}
-              onKeyDown={handleCommandExecute}
-              maxLength={10}
-            />
+            <input ref={commandInputRef} type="text" className="command-input" value={commandText} onChange={(e) => setCommandText(e.target.value)} onKeyDown={handleCommandExecute} maxLength={10} />
           </div>
         ) : errorMessage ? (
           <span className="error-msg">{errorMessage}</span>
