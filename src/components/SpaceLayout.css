@@ -72,6 +72,15 @@
   border-color: rgba(0, 0, 0, 0.03);
 }
 
+.space-links a.vim-focused {
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+:root[data-theme='light'] .space-links a.vim-focused {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
 .space-links a:hover {
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.06);

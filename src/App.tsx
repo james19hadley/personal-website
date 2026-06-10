@@ -101,6 +101,30 @@ function App() {
       localStorage.setItem('zijh-view', view);
     }
   }, [view]);
+  // Prevent mobile browser keyboard scrolling and notch cuts
+  useEffect(() => {
+    if (view === 'terminal' || view === 'gameboy') {
+      const handleScroll = () => {
+        if (window.scrollY !== 0) {
+          window.scrollTo(0, 0);
+        }
+      };
+      
+      window.addEventListener('scroll', handleScroll);
+      
+      // Lock scroll overflow
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+      };
+    }
+  }, [view]);
 
   // Sync theme attribute to HTML tag
   useEffect(() => {

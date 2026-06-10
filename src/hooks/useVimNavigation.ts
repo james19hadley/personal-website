@@ -58,6 +58,23 @@ export const useVimNavigation = ({ view, setView, prevNonTermView }: UseVimNavig
         return;
       }
 
+      // Handle Escape globally to go back/exit views, regardless of target element focus
+      if (e.key === 'Escape' || e.code === 'Escape') {
+        if (view === 'terminal') {
+          e.preventDefault();
+          setView(prevNonTermView);
+          return;
+        } else if (view === 'gameboy') {
+          e.preventDefault();
+          setView('terminal');
+          return;
+        } else if (view !== 'home') {
+          e.preventDefault();
+          setView('home');
+          return;
+        }
+      }
+
       if (view === 'terminal') return;
 
       // Skip navigation if typing in inputs or textareas
