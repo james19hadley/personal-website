@@ -8,6 +8,15 @@ interface UseVimNavigationProps {
   prevNonTermView: ViewType;
 }
 
+/**
+ * @hook useVimNavigation
+ * @description Centralized Vim keyboard navigation controller. Binds layout-independent shortcuts (j/k/h/l, Esc, Enter)
+ * to navigate and confirm interactive items (buttons, links, selects, cards). Supports non-Latin layouts (e.g. Russian) via physical KeyCode fallbacks.
+ * @param {ViewType} view - Current active layout view
+ * @param {(view: ViewType) => void} setView - Navigation layout callback
+ * @param {ViewType} prevNonTermView - Previous layout before entering terminal
+ * @returns {{ activeIndex: number, setActiveIndex: (idx: number) => void }} Focus index states
+ */
 export const useVimNavigation = ({ view, setView, prevNonTermView }: UseVimNavigationProps) => {
   const [activeIndex, setActiveIndex] = useState(-1);
 

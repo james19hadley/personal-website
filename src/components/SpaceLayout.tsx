@@ -5,6 +5,12 @@ interface SpaceLayoutProps {
   onBack: () => void;
 }
 
+/**
+ * @component SpaceLayout
+ * @description Space and interests dashboard. Showcases external projects, setup details,
+ * and key references that inspire the developer (such as Elite Dangerous, terminal tools, retro UI aesthetics).
+ * @param {() => void} onBack - Navigation callback returning to the home screen
+ */
 export const SpaceLayout = ({ onBack }: SpaceLayoutProps) => {
   return (
     <div className="layout-container fade-in">

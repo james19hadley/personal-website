@@ -7,6 +7,12 @@ interface BlogLayoutProps {
   onBack: () => void;
 }
 
+/**
+ * @component BlogLayout
+ * @description Blog dashboard showing article cards with read times and pagination support.
+ * Displays articles in a modal reader interface upon card selection.
+ * @param {() => void} onBack - Navigation callback returning to the home screen
+ */
 export const BlogLayout = ({ onBack }: BlogLayoutProps) => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [currentPage, setCurrentPage] = useState(1);

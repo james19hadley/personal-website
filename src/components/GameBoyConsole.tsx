@@ -40,6 +40,12 @@ const GBA_GAMES: GBAGame[] = [
   }
 ];
 
+/**
+ * @component GameBoyConsole
+ * @description Retro GameBoy Advance emulator component. Hosts a collection of Pokemon GBA ROMs via embedded emulator iframes.
+ * Features a persistent iframe to prevent game state reloads during fullscreen toggling, mapping of physical key events to visual handheld buttons, and save state guidance.
+ * @param {() => void} onBack - Navigation handler returning back to terminal shell
+ */
 export const GameBoyConsole = ({ onBack }: GameBoyConsoleProps) => {
   const [selectedGame, setSelectedGame] = useState<GBAGame>(GBA_GAMES[0]);
   const [isFullscreen, setIsFullscreen] = useState(false);

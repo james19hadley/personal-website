@@ -6,6 +6,12 @@ interface ProjectsLayoutProps {
   onBack: () => void;
 }
 
+/**
+ * @component ProjectsLayout
+ * @description Project list layout with classification filters. Houses lists of Handmade 🛠️ vs Vibe-coded ⚡ creations,
+ * with tech stacks and GitHub repository details. Card-level click handlers navigate to external URLs.
+ * @param {() => void} onBack - Navigation callback returning to the home screen
+ */
 export const ProjectsLayout = ({ onBack }: ProjectsLayoutProps) => {
   const vibeProjects = projects.filter(p => p.type === 'vibecoded');
   const handmadeProjects = projects.filter(p => p.type === 'handmade');

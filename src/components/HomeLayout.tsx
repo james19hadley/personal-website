@@ -8,6 +8,14 @@ interface HomeLayoutProps {
   toggleTheme: () => void;
 }
 
+/**
+ * @component HomeLayout
+ * @description Bento Grid GUI home layout. Presents the biography (CS student at TUD), tech stack widgets,
+ * project category access, blog previews, and a copyable email contact card.
+ * @param {(view: 'projects' | 'blog' | 'space' | 'terminal') => void} onNavigate - Navigation view switcher
+ * @param {'dark' | 'light'} theme - Current UI color theme
+ * @param {() => void} toggleTheme - Theme toggle handler
+ */
 export const HomeLayout = ({ onNavigate, theme, toggleTheme }: HomeLayoutProps) => {
   const [copiedEmail, setCopiedEmail] = useState(false);
 

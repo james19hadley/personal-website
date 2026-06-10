@@ -10,6 +10,12 @@ import { useVimNavigation } from './hooks/useVimNavigation';
 
 
 
+/**
+ * @component App
+ * @description Root application controller and layout orchestrator. Manages global view state (home, projects, blog, space, terminal, gameboy),
+ * theme settings (light/dark), and instantiates/restores the C++ in-memory virtual filesystem WebAssembly module.
+ * Integrates useVimNavigation hook to enable global Vim-style keyboard shortcuts.
+ */
 function App() {
   const [view, setView] = useState<'home' | 'projects' | 'blog' | 'space' | 'terminal' | 'gameboy'>(() => {
     const saved = localStorage.getItem('zijh-view');

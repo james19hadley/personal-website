@@ -39,6 +39,21 @@ const POKEMON_POOL = [
   { id: 384, name: 'rayquaza' }
 ];
 
+/**
+ * @component TerminalLayout
+ * @description Interactive terminal shell simulating a UNIX command line interface.
+ * Exposes commands (whoami, about, projects, blog, gui, theme, secret, pokemon, gameboy) and compiles/interacts with
+ * the C++ in-memory filesystem (tmpfs-cpp) loaded via WebAssembly. Implements automatic state serialization and caching in localStorage.
+ * @param {() => void} onSwitchToGui - Callback to swap layout back to Bento grid GUI
+ * @param {() => void} onNavigateToGameBoy - Callback to load GameBoy console layout
+ * @param {'dark' | 'light'} theme - Current active UI color theme
+ * @param {() => void} toggleTheme - Color theme toggle helper
+ * @param {any} wasmModule - Instantiated C++ WebAssembly filesystem module
+ * @param {string} currentPwd - Active shell path inside C++ filesystem
+ * @param {(pwd: string) => void} setCurrentPwd - Prompt working path updater
+ * @param {LogEntry[]} history - History array storing executed commands and outputs
+ * @param {React.Dispatch<any>} setHistory - State dispatcher for console log history
+ */
 export const TerminalLayout = ({ 
   onSwitchToGui, 
   onNavigateToGameBoy,
