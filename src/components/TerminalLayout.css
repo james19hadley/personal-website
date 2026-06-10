@@ -156,7 +156,7 @@
   font-family: var(--font-mono);
   color: var(--terminal-input);
   font-size: 0.9rem;
-  caret-color: transparent; /* custom cursor is blinking */
+  caret-color: var(--accent-cyan); /* visible cyan blinking cursor */
 }
 
 /* Help list */
