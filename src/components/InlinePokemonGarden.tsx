@@ -20,6 +20,11 @@ const STARTER_POOL = [
   { id: 151, name: 'mew' }
 ];
 
+/**
+ * @component InlinePokemonGarden
+ * @description Inline retro Pokémon Garden meadow. Renders a grid-based garden containing animated Pokémon sprites
+ * that walk around randomly and play retro synthesize sound effects/cries on click.
+ */
 export const InlinePokemonGarden = () => {
   const [pokemon, setPokemon] = useState<PokemonState[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);

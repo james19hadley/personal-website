@@ -10,6 +10,15 @@ interface VimEditorProps {
 
 type VimMode = 'NORMAL' | 'INSERT' | 'COMMAND';
 
+/**
+ * @component VimEditor
+ * @description Built-in retro text editor simulating key features of Vim (Normal, Insert, and Command modes).
+ * Supports cursor movement (h/j/k/l), deleting characters (x), writing changes (:w), and exiting (:q / :q!).
+ * @param {string} filename - The relative/absolute name of the file being edited
+ * @param {string} initialContent - Original file buffer string loaded on editor startup
+ * @param {(content: string) => void} onSave - Callback handler invoked to commit saved content back to the filesystem
+ * @param {() => void} onClose - Callback handler to dismiss editor and return focus back to the terminal prompt
+ */
 export const VimEditor = ({ filename, initialContent, onSave, onClose }: VimEditorProps) => {
   const [content, setContent] = useState(initialContent);
   const [mode, setMode] = useState<VimMode>('NORMAL');

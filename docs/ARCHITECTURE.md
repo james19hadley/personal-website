@@ -51,6 +51,18 @@ project category access, blog previews, and a copyable email contact card.
   - `theme` (`'dark' | 'light'`): Current UI color theme
   - `toggleTheme` (`() => void`): Theme toggle handler
 
+### 🧩 `InlinePokemonGarden`
+- **Source File**: [InlinePokemonGarden.tsx](file:///home/ging/prog/personal-website/src/components/InlinePokemonGarden.tsx)
+- **Description**: Inline retro Pokémon Garden meadow. Renders a grid-based garden containing animated Pokémon sprites
+that walk around randomly and play retro synthesize sound effects/cries on click.
+
+### 🧩 `MatrixRain`
+- **Source File**: [MatrixRain.tsx](file:///home/ging/prog/personal-website/src/components/MatrixRain.tsx)
+- **Description**: Fullscreen canvas overlay displaying the iconic falling Matrix digital rain code effect.
+Listens for key events (ESC/Q/Ctrl+C) to exit and return control back to the host terminal shell.
+- **Props / Parameters**:
+  - `onExit` (`() => void`): Callback triggered when exiting the matrix effect overlay
+
 ### 🧩 `ProjectsLayout`
 - **Source File**: [ProjectsLayout.tsx](file:///home/ging/prog/personal-website/src/components/ProjectsLayout.tsx)
 - **Description**: Project list layout with classification filters. Houses lists of Handmade 🛠️ vs Vibe-coded ⚡ creations,
@@ -70,6 +82,16 @@ and key references that inspire the developer (such as Elite Dangerous, terminal
 - **Description**: Interactive terminal shell simulating a UNIX command line interface.
 Exposes registry-mapped commands and compiles/interacts with the C++ virtual filesystem.
 
+### 🧩 `VimEditor`
+- **Source File**: [VimEditor.tsx](file:///home/ging/prog/personal-website/src/components/VimEditor.tsx)
+- **Description**: Built-in retro text editor simulating key features of Vim (Normal, Insert, and Command modes).
+Supports cursor movement (h/j/k/l), deleting characters (x), writing changes (:w), and exiting (:q / :q!).
+- **Props / Parameters**:
+  - `filename` (`string`): The relative/absolute name of the file being edited
+  - `initialContent` (`string`): Original file buffer string loaded on editor startup
+  - `onSave` (`(content: string) => void`): Callback handler invoked to commit saved content back to the filesystem
+  - `onClose` (`() => void`): Callback handler to dismiss editor and return focus back to the terminal prompt
+
 ---
 
 ## ⚓ Custom Hooks Registry
@@ -88,4 +110,4 @@ to navigate and confirm interactive items (buttons, links, selects, cards). Supp
 
 ---
 
-*Last generated: 2026-06-10T19:55:31.827Z*
+*Last generated: 2026-06-10T19:57:01.832Z*

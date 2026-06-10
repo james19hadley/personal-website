@@ -4,6 +4,12 @@ interface MatrixRainProps {
   onExit: () => void;
 }
 
+/**
+ * @component MatrixRain
+ * @description Fullscreen canvas overlay displaying the iconic falling Matrix digital rain code effect.
+ * Listens for key events (ESC/Q/Ctrl+C) to exit and return control back to the host terminal shell.
+ * @param {() => void} onExit - Callback triggered when exiting the matrix effect overlay
+ */
 export const MatrixRain = ({ onExit }: MatrixRainProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
