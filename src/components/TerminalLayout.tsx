@@ -292,9 +292,6 @@ export const TerminalLayout = ({
       case 'gui':
       case 'exit':
       case 'quit':
-      case ':q':
-      case ':wq':
-      case ':q!':
         // Transition back
         setTimeout(onSwitchToGui, 200);
         output = <p className="morph-text">Reconfiguring UI modules... returning home.</p>;

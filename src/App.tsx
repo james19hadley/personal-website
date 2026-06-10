@@ -6,6 +6,7 @@ import { SpaceLayout } from './components/SpaceLayout';
 import { TerminalLayout } from './components/TerminalLayout';
 import { GameBoyConsole } from './components/GameBoyConsole';
 import createTmpFSModule from './wasm/tmpfs.js';
+import { useVimNavigation } from './hooks/useVimNavigation';
 
 
 
@@ -25,7 +26,7 @@ function App() {
 
   // Track previous view for terminal hotkey toggle
   const [prevNonTermView, setPrevNonTermView] = useState<'home' | 'projects' | 'blog' | 'space'>('home');
-  const [activeIndex, setActiveIndex] = useState(-1);
+  useVimNavigation({ view, setView, prevNonTermView });
 
   // Keep WebAssembly filesystem state alive across UI page swaps
   const [wasmModule, setWasmModule] = useState<any>(null);
@@ -95,131 +96,11 @@ function App() {
     }
   }, [view]);
 
-  // Reset Vim focus highlight when switching pages
-  useEffect(() => {
-    setActiveIndex(-1);
-  }, [view]);
-
   // Sync theme attribute to HTML tag
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('zijh-theme', theme);
   }, [theme]);
-
-  // Keep focus visual styles in sync with activeIndex and view state changes after render
-  useEffect(() => {
-    if (view === 'terminal' || view === 'gameboy') return;
-
-    let selector = 'button, a:not(.p-tile-actions a), .blog-post-card, .project-tile-card';
-    const modal = document.querySelector('.blog-modal-content');
-    if (modal) {
-      selector = '.blog-modal-content button, .blog-modal-content a';
-    }
-
-    const elements = Array.from(document.querySelectorAll(selector)) as HTMLElement[];
-    const visibleElements = elements.filter(el => el.offsetParent !== null);
-
-    // Remove focus class from all elements
-    document.querySelectorAll('.vim-focused').forEach(el => el.classList.remove('vim-focused'));
-
-    // Apply focus class and focus the DOM element
-    if (activeIndex >= 0 && activeIndex < visibleElements.length) {
-      visibleElements[activeIndex].classList.add('vim-focused');
-      visibleElements[activeIndex].focus();
-    }
-  }, [activeIndex, view]);
-
-  // Global keyboard shortcuts (Ctrl+` for Terminal, and Vim keys for navigation)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Toggle terminal
-      if (e.ctrlKey && e.key === '`') {
-        e.preventDefault();
-        setView(prev => prev === 'terminal' ? prevNonTermView : 'terminal');
-        return;
-      }
-
-      if (view === 'terminal' || view === 'gameboy') return;
-
-      const target = e.target as HTMLElement;
-      // Skip if user is typing in form inputs (just in case they are added later)
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-        return;
-      }
-
-      const key = e.key.toLowerCase();
-      const code = e.code;
-
-      // Identify action based on both physical code (layout-independent) and semantic key
-      let action: 'forward' | 'backward' | 'confirm' | 'escape' | null = null;
-      if (key === 'enter' || code === 'Enter') {
-        action = 'confirm';
-      } else if (key === 'escape' || code === 'Escape') {
-        action = 'escape';
-      } else {
-        // If the key is a Latin letter, use key mapping (good for standard Latin layouts)
-        const isLatin = /^[a-z]$/.test(key);
-        if (isLatin) {
-          if (key === 'j' || key === 'l') {
-            action = 'forward';
-          } else if (key === 'k' || key === 'h') {
-            action = 'backward';
-          } else if (key === 'u' || key === 'q') {
-            action = 'escape';
-          }
-        } else {
-          // Fall back to physical code if non-Latin layout (e.g. Russian ЙЦУКЕН)
-          if (code === 'KeyJ' || code === 'KeyL') {
-            action = 'forward';
-          } else if (code === 'KeyK' || code === 'KeyH') {
-            action = 'backward';
-          } else if (code === 'KeyU' || code === 'KeyQ') {
-            action = 'escape';
-          }
-        }
-      }
-
-      if (!action) {
-        return;
-      }
-
-      // Query current list of interactive items
-      let selector = 'button, a:not(.p-tile-actions a), .blog-post-card, .project-tile-card';
-      const modal = document.querySelector('.blog-modal-content');
-      if (modal) {
-        selector = '.blog-modal-content button, .blog-modal-content a';
-      }
-
-      const elements = Array.from(document.querySelectorAll(selector)) as HTMLElement[];
-      const visibleElements = elements.filter(el => el.offsetParent !== null);
-
-      if (visibleElements.length === 0) return;
-
-      if (action === 'forward') {
-        e.preventDefault();
-        const newIndex = (activeIndex + 1) % visibleElements.length;
-        setActiveIndex(newIndex);
-      } else if (action === 'backward') {
-        e.preventDefault();
-        const newIndex = activeIndex <= 0 ? visibleElements.length - 1 : activeIndex - 1;
-        setActiveIndex(newIndex);
-      } else if (action === 'escape') {
-        e.preventDefault();
-        if (view !== 'home') {
-          setView('home');
-        }
-      } else if (action === 'confirm') {
-        if (activeIndex >= 0 && activeIndex < visibleElements.length) {
-          e.preventDefault();
-          visibleElements[activeIndex].click();
-          setActiveIndex(-1);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [view, activeIndex, prevNonTermView]);
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -280,7 +161,7 @@ function App() {
         {view === 'home' ? (
           <>Vim keys active: <code>J</code>/<code>L</code> to select // <code>Ctrl + `</code> for terminal</>
         ) : view === 'terminal' ? (
-          <>Press <code>Ctrl + `</code> or type <code>exit</code> / <code>:q</code> to close shell</>
+          <>Press <code>Ctrl + `</code> or type <code>exit</code> to close shell</>
         ) : view === 'gameboy' ? (
           <>Standard emulator controls: Arrow keys, Z/X, Enter, Shift // Click inside game to focus</>
         ) : (
