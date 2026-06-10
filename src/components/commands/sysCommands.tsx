@@ -34,6 +34,7 @@ export const sysCommands: { [key: string]: Command } = {
           <li><span className="cmd-name">echo &lt;content&gt; &lt;path&gt;</span> - Write text content to a file</li>
           <li><span className="cmd-name">cat &lt;path&gt;</span> - View contents of a file</li>
           <li><span className="cmd-name">vim &lt;path&gt;</span> - Edit file with built-in retro Vim editor</li>
+          <li><span className="cmd-name">df</span> - Display virtual disk space usage & limits</li>
           <li><span className="cmd-name">upload</span> - Upload file from computer to current VFS directory</li>
           <li><span className="cmd-name">download &lt;path&gt;</span> - Download file from VFS to computer</li>
           <li><span className="cmd-name">ln -s &lt;target&gt; &lt;link&gt;</span> - Create a symbolic link</li>
