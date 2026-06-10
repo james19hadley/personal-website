@@ -58,8 +58,33 @@ export const useVimNavigation = ({ view, setView, prevNonTermView }: UseVimNavig
         return;
       }
 
+      // Global Alt + [Letter] navigation shortcuts
+      if (e.altKey) {
+        const key = e.key.toLowerCase();
+        const code = e.code;
+        let targetView: ViewType | null = null;
+        
+        if (key === 't' || code === 'KeyT') targetView = 'terminal';
+        else if (key === 'g' || code === 'KeyG') targetView = 'gameboy';
+        else if (key === 'h' || code === 'KeyH') targetView = 'home';
+        else if (key === 'p' || code === 'KeyP') targetView = 'projects';
+        else if (key === 'b' || code === 'KeyB') targetView = 'blog';
+        else if (key === 's' || code === 'KeyS') targetView = 'space';
+        
+        if (targetView) {
+          e.preventDefault();
+          setView(targetView);
+          return;
+        }
+      }
+
       // Handle Escape globally to go back/exit views, regardless of target element focus
       if (e.key === 'Escape' || e.code === 'Escape') {
+        // If Vim or CMatrix is active inside terminal, let them handle Escape natively
+        if (document.querySelector('.vim-editor-container') || document.querySelector('.matrix-rain-overlay')) {
+          return;
+        }
+
         if (view === 'terminal') {
           e.preventDefault();
           setView(prevNonTermView);
