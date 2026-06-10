@@ -21,6 +21,7 @@ function App() {
 
   // Track previous view for terminal hotkey toggle
   const [prevNonTermView, setPrevNonTermView] = useState<'home' | 'projects' | 'blog' | 'space'>('home');
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   useEffect(() => {
     if (view !== 'terminal') {
@@ -29,13 +30,19 @@ function App() {
     localStorage.setItem('zijh-view', view);
   }, [view]);
 
+  // Reset Vim focus highlight when switching pages
+  useEffect(() => {
+    document.querySelectorAll('.vim-focused').forEach(el => el.classList.remove('vim-focused'));
+    setActiveIndex(-1);
+  }, [view]);
+
   // Sync theme attribute to HTML tag
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('zijh-theme', theme);
   }, [theme]);
 
-  // Global hotkey listeners (Ctrl+` for Terminal, and Vim keys for Back)
+  // Global keyboard shortcuts (Ctrl+` for Terminal, and Vim keys for navigation)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Toggle terminal
@@ -45,22 +52,76 @@ function App() {
         return;
       }
 
-      // Vim keys navigation (h, u, q, Esc to go back)
-      if (view !== 'home' && view !== 'terminal') {
-        const key = e.key.toLowerCase();
-        if (key === 'h' || key === 'u' || key === 'q' || e.key === 'Escape') {
-          // Verify we aren't typing in any inputs (none in these pages, but safe check)
-          const target = e.target as HTMLElement;
-          if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-            e.preventDefault();
-            setView('home');
-          }
+      if (view === 'terminal') return;
+
+      const target = e.target as HTMLElement;
+      // Skip if user is typing in form inputs (just in case they are added later)
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+
+      // Vim shortcut triggers: HJKL, Enter, Esc, U, Q
+      if (!['j', 'k', 'h', 'l', 'enter', 'escape', 'u', 'q'].includes(key)) {
+        return;
+      }
+
+      // Query current list of interactive items
+      let selector = 'button, a, .blog-post-card';
+      const modal = document.querySelector('.blog-modal-content');
+      if (modal) {
+        selector = '.blog-modal-content button, .blog-modal-content a';
+      }
+
+      const elements = Array.from(document.querySelectorAll(selector)) as HTMLElement[];
+      const visibleElements = elements.filter(el => el.offsetParent !== null);
+
+      if (visibleElements.length === 0) return;
+
+      let newIndex = activeIndex;
+
+      if (key === 'j' || key === 'l') {
+        // Navigate forward
+        e.preventDefault();
+        newIndex = (activeIndex + 1) % visibleElements.length;
+        setActiveIndex(newIndex);
+      } else if (key === 'k') {
+        // Navigate backward
+        e.preventDefault();
+        newIndex = activeIndex <= 0 ? visibleElements.length - 1 : activeIndex - 1;
+        setActiveIndex(newIndex);
+      } else if (key === 'h' || key === 'u' || key === 'q' || e.key === 'Escape') {
+        e.preventDefault();
+        // If we are currently focusing an element on a content page, H/K acts as navigation unless index is -1
+        // Let's make H/U/Q/Esc go back to home if we are on a page, or navigate if they are focused
+        if (view !== 'home') {
+          setView('home');
+          return;
+        }
+        
+        // If on home page, H can move backward
+        newIndex = activeIndex <= 0 ? visibleElements.length - 1 : activeIndex - 1;
+        setActiveIndex(newIndex);
+      } else if (e.key === 'Enter') {
+        if (activeIndex >= 0 && activeIndex < visibleElements.length) {
+          e.preventDefault();
+          visibleElements[activeIndex].click();
+          setActiveIndex(-1);
         }
       }
+
+      // Sync focus visual styles
+      visibleElements.forEach(el => el.classList.remove('vim-focused'));
+      if (newIndex >= 0 && newIndex < visibleElements.length) {
+        visibleElements[newIndex].classList.add('vim-focused');
+        visibleElements[newIndex].focus();
+      }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [view, prevNonTermView]);
+  }, [view, activeIndex, prevNonTermView]);
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -108,11 +169,11 @@ function App() {
       {/* Floating keybind helper */}
       <div className="hotkey-hint">
         {view === 'home' ? (
-          <>Press <code>Ctrl + `</code> to toggle terminal</>
+          <>Vim keys active: <code>J</code>/<code>L</code> to select // <code>Ctrl + `</code> for terminal</>
         ) : view === 'terminal' ? (
-          <>Press <code>Ctrl + `</code> or type <code>exit</code> to go back</>
+          <>Press <code>Ctrl + `</code> or type <code>exit</code> / <code>:q</code> to close shell</>
         ) : (
-          <>Vim keys active: press <code>H</code>, <code>U</code>, <code>Q</code>, or <code>Esc</code> to go back</>
+          <>Vim keys: <code>J</code>/<code>K</code> select // <code>H</code>, <code>U</code>, <code>Q</code>, or <code>Esc</code> to go back</>
         )}
       </div>
 
