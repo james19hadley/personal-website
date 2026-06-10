@@ -36,6 +36,9 @@ export const TerminalLayout = ({
   const [vimContent, setVimContent] = useState('');
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [inputDraft, setInputDraft] = useState('');
+  const [commandHistory, setCommandHistory] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('zijh-terminal-history') || '[]'); } catch { return []; }
+  });
 
   const consoleEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -95,10 +98,15 @@ export const TerminalLayout = ({
     const trimmed = cmdStr.trim();
     if (!trimmed) return;
 
+    setCommandHistory(prev => {
+      const next = [...prev, cmdStr];
+      try { localStorage.setItem('zijh-terminal-history', JSON.stringify(next)); } catch {}
+      return next;
+    });
+
     const parts = trimmed.split(' ');
     const command = parts[0].toLowerCase();
     const args = parts.slice(1);
-
     let output: ReactNode;
     const wasmCommands = ['pwd', 'cd', 'mkdir', 'touch', 'echo', 'cat', 'ln'];
 
@@ -109,47 +117,22 @@ export const TerminalLayout = ({
         output = <p className="error-text">WebAssembly tmpfs module is still initializing. Please wait a moment...</p>;
       } else {
         try {
-          const executeFn = wasmModule.cwrap('execute_command', 'string', ['string']);
-          const getPwdFn = wasmModule.cwrap('get_pwd', 'string', []);
-
-          const result = executeFn(trimmed);
-
-          const nextPwd = getPwdFn();
-          setCurrentPwd(nextPwd);
-
+          const result = wasmModule.cwrap('execute_command', 'string', ['string'])(trimmed);
+          setCurrentPwd(wasmModule.cwrap('get_pwd', 'string', [])());
           try {
-            const serializeFn = wasmModule.cwrap('serialize_fs', 'string', []);
-            const state = serializeFn();
-            localStorage.setItem('zijh-fs-state', state);
-          } catch (serializeErr) {
-            console.error('Failed to serialize filesystem state:', serializeErr);
-          }
-
-          output = result ? (
-            <pre className="wasm-output">{result}</pre>
-          ) : null;
+            localStorage.setItem('zijh-fs-state', wasmModule.cwrap('serialize_fs', 'string', [])());
+          } catch {}
+          output = result ? <pre className="wasm-output">{result}</pre> : null;
         } catch (err: any) {
           output = <p className="error-text">Wasm error: {err.message || String(err)}</p>;
         }
       }
     } else if (commandsRegistry[command]) {
       const ctx: CommandContext = {
-        rawCommand: trimmed,
-        args,
-        wasmModule,
-        currentPwd,
-        setCurrentPwd,
-        setHistory,
-        toggleTheme,
-        onSwitchToGui,
-        onNavigateToGameBoy,
-        clearHistory: () => setHistory([]),
-        setTerminalColor,
-        startCMatrix: () => setCmatrixActive(true),
-        openVimEditor,
-        toggleFullscreen: () => setIsMaximized(prev => !prev),
+        rawCommand: trimmed, args, wasmModule, currentPwd, setCurrentPwd, setHistory, toggleTheme,
+        onSwitchToGui, onNavigateToGameBoy, clearHistory: () => setHistory([]), setTerminalColor,
+        startCMatrix: () => setCmatrixActive(true), openVimEditor, toggleFullscreen: () => setIsMaximized(prev => !prev),
       };
-      
       const res = commandsRegistry[command].execute(ctx);
       if (res === null && command === 'clear') {
         setInputVal('');
@@ -183,7 +166,7 @@ export const TerminalLayout = ({
       }
       return;
     }
-    const cmds = history.filter(h => h.command !== undefined).map(h => h.command as string);
+    const cmds = commandHistory;
     if (cmds.length === 0 && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) return;
 
     const setCursor = (val: string) => {

@@ -59,7 +59,7 @@ export const renderColoredLs = (targetPath: string, wasmModule: any, currentPwd:
                 textShadow: isDir ? '0 0 8px rgba(34, 211, 238, 0.25)' : 'none'
               }}
             >
-              {isDir ? `📁 ${name}/` : `📄 ${name}`}
+              {isDir ? `${name}/` : name}
             </span>
           );
         })}
