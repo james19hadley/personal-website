@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface MatrixRainProps {
   onExit: () => void;
@@ -12,6 +12,12 @@ interface MatrixRainProps {
  */
 export const MatrixRain = ({ onExit }: MatrixRainProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [showClue, setShowClue] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowClue(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -98,23 +104,25 @@ export const MatrixRain = ({ onExit }: MatrixRainProps) => {
       }}
     >
       <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
-      <div 
-        style={{
-          position: 'absolute',
-          top: '12px',
-          right: '18px',
-          background: 'rgba(0, 0, 0, 0.7)',
-          padding: '6px 12px',
-          borderRadius: '6px',
-          fontSize: '0.8rem',
-          border: '1px solid #0f0',
-          pointerEvents: 'none',
-          zIndex: 101,
-          fontFamily: 'var(--font-mono)'
-        }}
-      >
-        [ cmatrix active — press Q or ESC to exit ]
-      </div>
+      {showClue && (
+        <div 
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '18px',
+            background: 'rgba(0, 0, 0, 0.7)',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            fontSize: '0.8rem',
+            border: '1px solid #0f0',
+            pointerEvents: 'none',
+            zIndex: 101,
+            fontFamily: 'var(--font-mono)'
+          }}
+        >
+          [ cmatrix active — press Q or ESC to exit ]
+        </div>
+      )}
     </div>
   );
 };

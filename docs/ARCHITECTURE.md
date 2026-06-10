@@ -51,6 +51,10 @@ project category access, blog previews, and a copyable email contact card.
   - `theme` (`'dark' | 'light'`): Current UI color theme
   - `toggleTheme` (`() => void`): Theme toggle handler
 
+### 🧩 `HotkeyHint`
+- **Source File**: [HotkeyHint.tsx](file:///home/ging/prog/personal-website/src/components/HotkeyHint.tsx)
+- **Description**: Floating question-mark icon in the bottom-right corner. On hover, reveals a detailed glassmorphic cheat sheet panel of all site-wide keyboard shortcuts.
+
 ### 🧩 `InlinePokemonGarden`
 - **Source File**: [InlinePokemonGarden.tsx](file:///home/ging/prog/personal-website/src/components/InlinePokemonGarden.tsx)
 - **Description**: Inline retro Pokémon Garden meadow. Renders a grid-based garden containing animated Pokémon sprites
@@ -118,4 +122,4 @@ to navigate and confirm interactive items (buttons, links, selects, cards). Supp
 
 ---
 
-*Last generated: 2026-06-10T20:25:27.402Z*
+*Last generated: 2026-06-10T20:31:33.351Z*

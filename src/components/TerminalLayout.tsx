@@ -33,6 +33,8 @@ export const TerminalLayout = ({
   const [vimActive, setVimActive] = useState(false);
   const [vimFileName, setVimFileName] = useState('');
   const [vimContent, setVimContent] = useState('');
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [inputDraft, setInputDraft] = useState('');
 
   const consoleEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -66,47 +68,26 @@ export const TerminalLayout = ({
 
   const openVimEditor = (filename: string) => {
     setVimFileName(filename);
-    const absolutePath = filename.startsWith('/')
-      ? filename
-      : (currentPwd === '/' ? '' : currentPwd) + '/' + filename;
-    
-    let initialText = '';
+    const path = filename.startsWith('/') ? filename : `${currentPwd === '/' ? '' : currentPwd}/${filename}`;
+    let text = '';
     if (wasmModule) {
       try {
-        const executeFn = wasmModule.cwrap('execute_command', 'string', ['string']);
-        const catResult = executeFn(`cat ${absolutePath}`);
-        if (!catResult.startsWith('cat: ')) {
-          initialText = catResult;
-          if (initialText.endsWith('\n')) {
-            initialText = initialText.slice(0, -1);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load file for Vim:', err);
-      }
+        const res = wasmModule.cwrap('execute_command', 'string', ['string'])(`cat ${path}`);
+        if (!res.startsWith('cat: ')) text = res.endsWith('\n') ? res.slice(0, -1) : res;
+      } catch (e) { console.error('Failed to load file for Vim:', e); }
     }
-    setVimContent(initialText);
+    setVimContent(text);
     setVimActive(true);
   };
 
   const handleVimSave = (content: string) => {
-    const absolutePath = vimFileName.startsWith('/')
-      ? vimFileName
-      : (currentPwd === '/' ? '' : currentPwd) + '/' + vimFileName;
-
+    const path = vimFileName.startsWith('/') ? vimFileName : `${currentPwd === '/' ? '' : currentPwd}/${vimFileName}`;
     if (wasmModule) {
       try {
-        const writeFileFn = wasmModule.cwrap('write_file_raw', null, ['string', 'string']);
-        writeFileFn(absolutePath, content);
-
-        const serializeFn = wasmModule.cwrap('serialize_fs', 'string', []);
-        const state = serializeFn();
-        localStorage.setItem('zijh-fs-state', state);
-
+        wasmModule.cwrap('write_file_raw', null, ['string', 'string'])(path, content);
+        localStorage.setItem('zijh-fs-state', wasmModule.cwrap('serialize_fs', 'string', [])());
         setVimContent(content);
-      } catch (err) {
-        console.error('Failed to save file from Vim:', err);
-      }
+      } catch (e) { console.error('Failed to save file from Vim:', e); }
     }
   };
 
@@ -114,9 +95,7 @@ export const TerminalLayout = ({
     setVimActive(false);
     setVimFileName('');
     setVimContent('');
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 50);
+    setTimeout(() => inputRef.current?.focus(), 50);
   };
 
   const customColors = TERMINAL_COLORS_MAP[termColor] || null;
@@ -126,17 +105,13 @@ export const TerminalLayout = ({
     '--terminal-input': customColors.text,
   } as React.CSSProperties : {};
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: any) => {
     setInputVal(e.target.value);
     setCursorIndex(e.target.selectionStart || 0);
   };
 
-  const handleInputKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    setCursorIndex((e.target as HTMLInputElement).selectionStart || 0);
-  };
-
-  const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
-    setCursorIndex((e.target as HTMLInputElement).selectionStart || 0);
+  const updateCursor = (e: any) => {
+    setCursorIndex(e.target.selectionStart || 0);
   };
 
   const handleCommandRun = (cmdStr: string) => {
@@ -209,17 +184,42 @@ export const TerminalLayout = ({
     setHistory(prev => [...prev, { command: cmdStr, pwd: currentPwd, output }]);
     setInputVal('');
     setCursorIndex(0);
+    setHistoryIndex(-1);
+    setInputDraft('');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleCommandRun(inputVal);
-    } else {
+    if (e.key === 'Enter') return handleCommandRun(inputVal);
+    const cmds = history.filter(h => h.command !== undefined).map(h => h.command as string);
+    if (cmds.length === 0 && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) return;
+
+    const setCursor = (val: string) => {
+      setInputVal(val);
       setTimeout(() => {
-        if (inputRef.current) {
-          setCursorIndex(inputRef.current.selectionStart || 0);
-        }
+        inputRef.current?.setSelectionRange(val.length, val.length);
+        setCursorIndex(val.length);
       }, 0);
+    };
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const nextIdx = historyIndex === -1 ? cmds.length - 1 : Math.max(0, historyIndex - 1);
+      if (historyIndex === -1) setInputDraft(inputVal);
+      setHistoryIndex(nextIdx);
+      setCursor(cmds[nextIdx]);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex === -1) return;
+      const nextIdx = historyIndex + 1;
+      if (nextIdx < cmds.length) {
+        setHistoryIndex(nextIdx);
+        setCursor(cmds[nextIdx]);
+      } else {
+        setHistoryIndex(-1);
+        setCursor(inputDraft);
+      }
+    } else {
+      setTimeout(() => setCursorIndex(inputRef.current?.selectionStart || 0), 0);
     }
   };
 
@@ -272,8 +272,8 @@ export const TerminalLayout = ({
             value={inputVal}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onKeyUp={handleInputKeyUp}
-            onClick={handleInputClick}
+            onKeyUp={updateCursor}
+            onClick={updateCursor}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             autoComplete="off"

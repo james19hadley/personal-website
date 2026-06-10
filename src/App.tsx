@@ -7,6 +7,7 @@ import { TerminalLayout } from './components/TerminalLayout';
 import { GameBoyConsole } from './components/GameBoyConsole';
 import createTmpFSModule from './wasm/tmpfs.js';
 import { useVimNavigation } from './hooks/useVimNavigation';
+import { HotkeyHint } from './components/HotkeyHint';
 
 
 
@@ -18,9 +19,13 @@ import { useVimNavigation } from './hooks/useVimNavigation';
  */
 function App() {
   const [view, setView] = useState<'home' | 'projects' | 'blog' | 'space' | 'terminal' | 'gameboy'>(() => {
+    const hash = window.location.hash.replace('#/', '');
+    if (['projects', 'blog', 'space', 'terminal', 'gameboy'].includes(hash)) {
+      return hash as any;
+    }
     const saved = localStorage.getItem('zijh-view');
     if (saved === 'projects' || saved === 'blog' || saved === 'space' || saved === 'terminal') {
-      return saved as 'projects' | 'blog' | 'space' | 'terminal';
+      return saved as any;
     }
     return 'home';
   });
@@ -33,6 +38,29 @@ function App() {
   // Track previous view for terminal hotkey toggle
   const [prevNonTermView, setPrevNonTermView] = useState<'home' | 'projects' | 'blog' | 'space'>('home');
   useVimNavigation({ view, setView, prevNonTermView });
+
+  // Sync view state to URL hash
+  useEffect(() => {
+    if (view === 'home') {
+      window.history.pushState(null, '', window.location.pathname);
+    } else {
+      window.location.hash = `#/${view}`;
+    }
+  }, [view]);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#/', '');
+      if (['home', 'projects', 'blog', 'space', 'terminal', 'gameboy'].includes(hash)) {
+        setView(hash as any);
+      } else if (!hash) {
+        setView('home');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Keep WebAssembly filesystem state alive across UI page swaps
   const [wasmModule, setWasmModule] = useState<any>(null);
@@ -187,46 +215,7 @@ function App() {
       )}
 
       {/* Floating keybind helper */}
-      <div className="hotkey-hint">
-        {view === 'home' ? (
-          <>Vim keys active: <code>J</code>/<code>L</code> to select // <code>Ctrl + `</code> for terminal</>
-        ) : view === 'terminal' ? (
-          <>Press <code>Ctrl + `</code> or type <code>exit</code> to close shell</>
-        ) : view === 'gameboy' ? (
-          <>Standard emulator controls: Arrow keys, Z/X, Enter, Shift // Click inside game to focus</>
-        ) : (
-          <>Vim keys: <code>J</code>/<code>K</code> select // <code>H</code>, <code>U</code>, <code>Q</code>, or <code>Esc</code> to go back</>
-        )}
-      </div>
-
-      <style>{`
-        .hotkey-hint {
-          position: fixed;
-          bottom: 12px;
-          right: 12px;
-          font-size: 0.7rem;
-          color: var(--text-muted);
-          background: rgba(0, 0, 0, 0.25);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          padding: 4px 10px;
-          border-radius: 8px;
-          pointer-events: none;
-          z-index: 90;
-          font-family: var(--font-sans);
-        }
-        :root[data-theme='light'] .hotkey-hint {
-          background: rgba(255, 255, 255, 0.7);
-          border-color: rgba(0, 0, 0, 0.05);
-          color: var(--text-secondary);
-        }
-        .hotkey-hint code {
-          background: rgba(255, 255, 255, 0.1);
-          padding: 1px 4px;
-          border-radius: 4px;
-          font-size: 0.65rem;
-          color: var(--accent-cyan);
-        }
-      `}</style>
+      <HotkeyHint />
     </>
   );
 }
