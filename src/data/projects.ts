@@ -12,15 +12,6 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    id: 'dvorak-trainer',
-    title: 'Dvorak Keyboard Trainer',
-    description: 'An interactive minimal keyboard training app designed specifically for mastering the Dvorak layout. Tracks character accuracy and typing speed.',
-    type: 'handmade',
-    techStack: ['React', 'TypeScript', 'Web Audio API'],
-    githubUrl: 'https://github.com/james19hadley/dvorak-trainer',
-    status: 'completed'
-  },
-  {
     id: 'tud-compiler',
     title: 'TUD Custom Language Compiler',
     description: 'A compiler for a simplified procedural programming language, featuring lexical analysis, AST construction, code optimization, and x86 target code generation. Built for a compiler design course at TU Darmstadt.',

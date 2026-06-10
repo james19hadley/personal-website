@@ -50,7 +50,7 @@ Instead of simulating terminal commands in JavaScript, the site runs Ivan's actu
 The site features Vim-like keyboard navigation (`HJKL`, `U`, `Q`, `Esc`, `Enter`) to browse and trigger elements without a mouse.
 
 - **Multi-Layout Binding**: Key listeners use `e.code` (e.g., `KeyJ`, `KeyL`) to target the physical keyboard positions, ensuring keyboard navigation works flawlessly regardless of language layout (e.g., Russian ЙЦУКЕН, German QWERTZ).
-- **Dvorak Fallback**: It checks `e.key` (character-based) to maintain native mappings for custom keyboard layouts such as English Dvorak.
+- **Keyboard Mappings Fallback**: It checks `e.key` (character-based) to maintain native mappings for custom keyboard layouts.
 - **Visual Highlighter**: Focused elements receive the `.vim-focused` styling defined in [src/index.css](file:///home/ging/prog/personal-website/src/index.css), creating glassmorphic glowing borders.
 
 ---

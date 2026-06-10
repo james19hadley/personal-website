@@ -96,7 +96,7 @@ export const SpaceLayout = ({ onBack }: SpaceLayoutProps) => {
             <p>Current setup and physical equipment:</p>
             <ul className="space-links font-mono-list">
               <li>
-                <span className="space-tag">layout:</span> Dvorak Keyboard Layout
+                <span className="space-tag">keyboard:</span> Custom Split Mechanical
               </li>
               <li>
                 <span className="space-tag">editor:</span> Vim keybindings everywhere

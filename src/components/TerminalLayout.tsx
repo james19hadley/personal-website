@@ -314,7 +314,7 @@ export const TerminalLayout = ({
           <div className="cmd-output-secret">
             <p className="cyber-diag">Running ZIJH diagnostic parameters...</p>
             <p className="cyan-glow">[OK] Mainframes connected to zijh.pages.dev proxy.</p>
-            <p className="cyan-glow">[OK] Dvorak layout constraints initialized (a,o,e,u,i,d,h,t,n,s).</p>
+            <p className="cyan-glow">[OK] Keyboard layouts and shortcuts map resolved.</p>
             <p className="cyan-glow">[OK] Nen affinity detected: Specialization (Ging Freecss legacy).</p>
             <p className="matrix-ascii">
 {`   _     _ _ _     

@@ -128,14 +128,14 @@ function App() {
       const key = e.key.toLowerCase();
       const code = e.code;
 
-      // Identify action based on both physical code (layout-independent) and semantic key (Dvorak/English)
+      // Identify action based on both physical code (layout-independent) and semantic key
       let action: 'forward' | 'backward' | 'back' | 'confirm' | 'escape' | null = null;
       if (key === 'enter' || code === 'Enter') {
         action = 'confirm';
       } else if (key === 'escape' || code === 'Escape') {
         action = 'escape';
       } else {
-        // If the key is a Latin letter, use key mapping (good for Dvorak/QWERTY English)
+        // If the key is a Latin letter, use key mapping (good for standard Latin layouts)
         const isLatin = /^[a-z]$/.test(key);
         if (isLatin) {
           if (key === 'j' || key === 'l') {
