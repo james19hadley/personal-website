@@ -9,6 +9,15 @@ interface BlogLayoutProps {
 
 export const BlogLayout = ({ onBack }: BlogLayoutProps) => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Set to 1 for demonstration since we currently have 2 posts.
+  // In production, change this to 5 or 10.
+  const POSTS_PER_PAGE = 1; 
+  
+  const totalPages = Math.ceil(blogPosts.length / POSTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+  const paginatedPosts = blogPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
 
   if (selectedPost) {
     return (
@@ -75,7 +84,7 @@ export const BlogLayout = ({ onBack }: BlogLayoutProps) => {
         <h2 className="section-title">thought logs</h2>
 
         <div className="blog-posts-list">
-          {blogPosts.map(post => (
+          {paginatedPosts.map(post => (
             <article 
               key={post.id} 
               className="blog-post-card glassmorphism"
@@ -94,6 +103,29 @@ export const BlogLayout = ({ onBack }: BlogLayoutProps) => {
             </article>
           ))}
         </div>
+
+        {/* PAGINATION CONTROLS */}
+        {totalPages > 1 && (
+          <div className="blog-pagination">
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              className="pagination-btn"
+            >
+              prev
+            </button>
+            <span className="pagination-info">
+              page {currentPage} of {totalPages}
+            </span>
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="pagination-btn"
+            >
+              next
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Mail, Terminal, Sun, Moon, FolderGit, BookOpen, Check } from 'lucide-react';
+import { Mail, Terminal, Sun, Moon, FolderGit, BookOpen, Check, Sparkles } from 'lucide-react';
 import './HomeLayout.css';
 
 interface HomeLayoutProps {
-  onNavigate: (view: 'projects' | 'blog' | 'terminal') => void;
+  onNavigate: (view: 'projects' | 'blog' | 'space' | 'terminal') => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
 }
@@ -33,10 +33,6 @@ export const HomeLayout = ({ onNavigate, theme, toggleTheme }: HomeLayoutProps) 
       <main className="home-main">
         <div className="home-logo-wrapper">
           <h1 className="home-logo">zijh</h1>
-          <div className="status-badge">
-            <span className="pulse-dot"></span>
-            <span>online // building</span>
-          </div>
         </div>
 
         <p className="home-subtitle">
@@ -51,6 +47,10 @@ export const HomeLayout = ({ onNavigate, theme, toggleTheme }: HomeLayoutProps) 
           <button onClick={() => onNavigate('blog')} className="nav-link-btn">
             <BookOpen size={14} />
             <span>blog</span>
+          </button>
+          <button onClick={() => onNavigate('space')} className="nav-link-btn">
+            <Sparkles size={14} />
+            <span>my space</span>
           </button>
           <button onClick={() => onNavigate('terminal')} className="nav-link-btn">
             <Terminal size={14} />

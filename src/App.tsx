@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { HomeLayout } from './components/HomeLayout';
 import { ProjectsLayout } from './components/ProjectsLayout';
 import { BlogLayout } from './components/BlogLayout';
+import { SpaceLayout } from './components/SpaceLayout';
 import { TerminalLayout } from './components/TerminalLayout';
 
 function App() {
-  const [view, setView] = useState<'home' | 'projects' | 'blog' | 'terminal'>(() => {
+  const [view, setView] = useState<'home' | 'projects' | 'blog' | 'space' | 'terminal'>(() => {
     const saved = localStorage.getItem('zijh-view');
-    if (saved === 'projects' || saved === 'blog' || saved === 'terminal') {
-      return saved as 'projects' | 'blog' | 'terminal';
+    if (saved === 'projects' || saved === 'blog' || saved === 'space' || saved === 'terminal') {
+      return saved as 'projects' | 'blog' | 'space' | 'terminal';
     }
     return 'home';
   });
@@ -19,7 +20,7 @@ function App() {
   });
 
   // Track previous view for terminal hotkey toggle
-  const [prevNonTermView, setPrevNonTermView] = useState<'home' | 'projects' | 'blog'>('home');
+  const [prevNonTermView, setPrevNonTermView] = useState<'home' | 'projects' | 'blog' | 'space'>('home');
 
   useEffect(() => {
     if (view !== 'terminal') {
@@ -34,17 +35,32 @@ function App() {
     localStorage.setItem('zijh-theme', theme);
   }, [theme]);
 
-  // Global hotkey listener (Ctrl + `) to toggle Terminal mode
+  // Global hotkey listeners (Ctrl+` for Terminal, and Vim keys for Back)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Toggle terminal
       if (e.ctrlKey && e.key === '`') {
         e.preventDefault();
         setView(prev => prev === 'terminal' ? prevNonTermView : 'terminal');
+        return;
+      }
+
+      // Vim keys navigation (h, u, q, Esc to go back)
+      if (view !== 'home' && view !== 'terminal') {
+        const key = e.key.toLowerCase();
+        if (key === 'h' || key === 'u' || key === 'q' || e.key === 'Escape') {
+          // Verify we aren't typing in any inputs (none in these pages, but safe check)
+          const target = e.target as HTMLElement;
+          if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            setView('home');
+          }
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [prevNonTermView]);
+  }, [view, prevNonTermView]);
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -76,6 +92,11 @@ function App() {
           onBack={() => setView('home')} 
         />
       )}
+      {view === 'space' && (
+        <SpaceLayout 
+          onBack={() => setView('home')} 
+        />
+      )}
       {view === 'terminal' && (
         <TerminalLayout 
           onSwitchToGui={() => setView(prevNonTermView)} 
@@ -84,9 +105,15 @@ function App() {
         />
       )}
 
-      {/* Floating hotkey helper */}
+      {/* Floating keybind helper */}
       <div className="hotkey-hint">
-        Press <code>Ctrl + `</code> to toggle terminal
+        {view === 'home' ? (
+          <>Press <code>Ctrl + `</code> to toggle terminal</>
+        ) : view === 'terminal' ? (
+          <>Press <code>Ctrl + `</code> or type <code>exit</code> to go back</>
+        ) : (
+          <>Vim keys active: press <code>H</code>, <code>U</code>, <code>Q</code>, or <code>Esc</code> to go back</>
+        )}
       </div>
 
       <style>{`

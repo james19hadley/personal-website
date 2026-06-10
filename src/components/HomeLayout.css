@@ -65,8 +65,9 @@
 .home-logo {
   font-size: 5.5rem;
   font-weight: 800;
-  letter-spacing: -1.5px;
-  line-height: 1;
+  letter-spacing: -0.5px;
+  line-height: 1.25;
+  padding-bottom: 12px;
   text-transform: lowercase; /* enforce lowercase */
   background: linear-gradient(135deg, #ffffff 0%, #c084fc 60%, #22d3ee 100%);
   -webkit-background-clip: text;

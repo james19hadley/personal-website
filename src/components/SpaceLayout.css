@@ -1,0 +1,111 @@
+.space-intro {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.space-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.space-section {
+  padding: 24px;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.section-header-row h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: lowercase;
+}
+
+.space-icon {
+  flex-shrink: 0;
+}
+
+.space-icon.cyan { color: var(--accent-cyan); }
+.space-icon.violet { color: var(--accent-violet); }
+.space-icon.emerald { color: var(--accent-emerald); }
+.space-icon.amber { color: #f59e0b; }
+
+.space-section p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.space-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.space-links a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: var(--transition-fast);
+}
+
+:root[data-theme='light'] .space-links a {
+  background: rgba(0, 0, 0, 0.01);
+  border-color: rgba(0, 0, 0, 0.03);
+}
+
+.space-links a:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(2px);
+}
+
+:root[data-theme='light'] .space-links a:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.font-mono-list li {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+:root[data-theme='light'] .font-mono-list li {
+  border-bottom-color: rgba(0, 0, 0, 0.02);
+}
+
+.font-mono-list li:last-child {
+  border-bottom: none;
+}
+
+.space-tag {
+  color: var(--text-muted);
+  margin-right: 6px;
+}
+
+@media (max-width: 680px) {
+  .space-grid {
+    grid-template-columns: 1fr;
+  }
+}
