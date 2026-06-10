@@ -148,15 +148,75 @@
   gap: 10px;
 }
 
-.console-input {
+.input-wrapper {
+  position: relative;
   flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
+  display: flex;
+  align-items: center;
+}
+
+.console-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: transparent !important; /* Hide native text */
+  caret-color: transparent !important; /* Hide native cursor */
+  font-family: var(--font-mono) !important;
+  font-size: 0.9rem !important;
+  letter-spacing: normal !important;
+  z-index: 2;
+  padding: 0;
+  margin: 0;
+}
+
+.input-display {
+  width: 100%;
+  pointer-events: none; /* Let clicks pass to the input behind it */
+  white-space: pre-wrap;
+  word-break: break-all;
   font-family: var(--font-mono);
-  color: var(--terminal-input);
   font-size: 0.9rem;
-  caret-color: var(--accent-cyan); /* visible cyan blinking cursor */
+  letter-spacing: normal;
+  color: var(--terminal-input);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.block-cursor {
+  display: inline-block;
+  background-color: var(--accent-cyan);
+  color: #000;
+  line-height: 1.2;
+}
+
+.block-cursor.blinking {
+  animation: cursorBlink 1s infinite;
+}
+
+.block-cursor.solid {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: inherit;
+}
+
+@keyframes cursorBlink {
+  0%, 49% {
+    background-color: var(--accent-cyan);
+    color: #000;
+  }
+  50%, 100% {
+    background-color: transparent;
+    color: inherit;
+  }
 }
 
 /* Help list */
@@ -383,6 +443,20 @@
 }
 
 
+/* Fullscreen Maximize */
+.terminal-container.maximized {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  z-index: 9999 !important;
+}
+
 /* Mobile responsive fixes */
 @media (max-width: 600px) {
   .welcome-ascii {
@@ -392,7 +466,18 @@
     padding: 16px;
   }
   .terminal-container {
-    height: 90vh;
-    margin: 20px auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    z-index: 9999;
+  }
+  .hotkey-hint {
+    display: none !important;
   }
 }

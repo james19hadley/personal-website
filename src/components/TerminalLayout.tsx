@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react';
 import { projects } from '../data/projects';
 import { blogPosts } from '../data/blog';
-import { Terminal as TerminalIcon, Sun, Moon, Layout } from 'lucide-react';
+import { Terminal as TerminalIcon, Sun, Moon, Layout, Maximize2, Minimize2 } from 'lucide-react';
 import { InlinePokemonGarden } from './InlinePokemonGarden';
 import './TerminalLayout.css';
 
@@ -66,6 +66,22 @@ export const TerminalLayout = ({
   setHistory
 }: TerminalLayoutProps) => {
   const [inputVal, setInputVal] = useState('');
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [cursorIndex, setCursorIndex] = useState(0);
+  const [isFocused, setIsFocused] = useState(true);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputVal(e.target.value);
+    setCursorIndex(e.target.selectionStart || 0);
+  };
+
+  const handleInputKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    setCursorIndex((e.target as HTMLInputElement).selectionStart || 0);
+  };
+
+  const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    setCursorIndex((e.target as HTMLInputElement).selectionStart || 0);
+  };
 
 
   
@@ -355,16 +371,23 @@ export const TerminalLayout = ({
 
     setHistory(prev => [...prev, { command: cmdStr, pwd: currentPwd, output }]);
     setInputVal('');
+    setCursorIndex(0);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleCommandRun(inputVal);
+    } else {
+      setTimeout(() => {
+        if (inputRef.current) {
+          setCursorIndex(inputRef.current.selectionStart || 0);
+        }
+      }, 0);
     }
   };
 
   return (
-    <div className="terminal-container fade-in" onClick={focusInput}>
+    <div className={`terminal-container fade-in ${isMaximized ? 'maximized' : ''}`} onClick={focusInput}>
       {/* HEADER CONTROLS */}
       <header className="terminal-header-bar">
         <div className="header-meta">
@@ -372,6 +395,13 @@ export const TerminalLayout = ({
           <span>james19hadley@zijh-shell: ~</span>
         </div>
         <div className="header-controls">
+          <button 
+            onClick={() => setIsMaximized(!isMaximized)} 
+            className="term-ctrl-btn" 
+            title={isMaximized ? "Restore Window" : "Maximize Terminal"}
+          >
+            {isMaximized ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          </button>
           <button onClick={toggleTheme} className="term-ctrl-btn" title="Toggle Theme">
             {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
           </button>
@@ -400,18 +430,31 @@ export const TerminalLayout = ({
       {/* INPUT BAR */}
       <div className="console-input-bar">
         <span className="prompt-indicator">zijh {currentPwd} $</span>
-        <input
-          ref={inputRef}
-          type="text"
-          className="console-input"
-          value={inputVal}
-          onChange={e => setInputVal(e.target.value)}
-          onKeyDown={handleKeyDown}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck="false"
-        />
+        <div className="input-wrapper">
+          <input
+            ref={inputRef}
+            type="text"
+            className="console-input"
+            value={inputVal}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onKeyUp={handleInputKeyUp}
+            onClick={handleInputClick}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
+          />
+          <div className="input-display">
+            <span>{inputVal.slice(0, cursorIndex)}</span>
+            <span className={`block-cursor ${isFocused ? 'blinking' : 'solid'}`}>
+              {inputVal.slice(cursorIndex, cursorIndex + 1) || '\u00A0'}
+            </span>
+            <span>{inputVal.slice(cursorIndex + 1)}</span>
+          </div>
+        </div>
       </div>
 
       {/* SHORTCUT BAR FOR MOBILE */}
