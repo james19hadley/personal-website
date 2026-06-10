@@ -2,12 +2,13 @@ import { useState, useRef, useEffect, type ReactNode } from 'react';
 import { projects } from '../data/projects';
 import { blogPosts } from '../data/blog';
 import { Terminal as TerminalIcon, Sun, Moon, Layout } from 'lucide-react';
+import { InlinePokemonGarden } from './InlinePokemonGarden';
 import './TerminalLayout.css';
 
 
 interface TerminalLayoutProps {
   onSwitchToGui: () => void;
-  onNavigateToGarden: () => void;
+  onNavigateToGameBoy: () => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
   wasmModule: any;
@@ -40,7 +41,7 @@ const POKEMON_POOL = [
 
 export const TerminalLayout = ({ 
   onSwitchToGui, 
-  onNavigateToGarden,
+  onNavigateToGameBoy,
   theme, 
   toggleTheme,
   wasmModule,
@@ -128,7 +129,8 @@ export const TerminalLayout = ({
                 <li><span className="cmd-name">theme</span> - Toggle light/dark UI themes</li>
                 <li><span className="cmd-name">clear</span> - Reset terminal window history</li>
                 <li><span className="cmd-name">secret</span> - Run custom system diagnostics</li>
-                <li><span className="cmd-name">pokemon [garden | view &lt;name&gt;]</span> - Access secret GameBoy garden or view sprites</li>
+                <li><span className="cmd-name">pokemon [garden | view &lt;name&gt;]</span> - View animated sprites or render garden inline</li>
+                <li><span className="cmd-name">gameboy</span> - Launch standalone GameBoy GBA Emulator (plays FireRed)</li>
               </ul>
               <p className="section-title" style={{ marginTop: '16px' }}>C++ Virtual Filesystem (tmpfs-cpp Wasm):</p>
               <ul className="help-list">
@@ -172,8 +174,7 @@ export const TerminalLayout = ({
       case 'pokemon': {
         const subAction = args[0] ? args[0].toLowerCase() : '';
         if (subAction === 'garden') {
-          setTimeout(onNavigateToGarden, 200);
-          output = <p className="morph-text">Booting Retro GBA Console modules... Entering Pokémon Garden.</p>;
+          output = <InlinePokemonGarden />;
         } else if (subAction === 'view') {
           const targetName = args[1] ? args[1].toLowerCase() : 'bulbasaur';
           const pokeObj = POKEMON_POOL.find(p => p.name === targetName || p.id === parseInt(targetName));
@@ -199,7 +200,7 @@ export const TerminalLayout = ({
             <div className="cmd-output-pokemon-help">
               <p className="section-title">Pokémon Command Line System:</p>
               <ul className="help-list">
-                <li><span className="cmd-name">pokemon garden</span> - Launch the secret GameBoy Pokémon Garden</li>
+                <li><span className="cmd-name">pokemon garden</span> - Render the animated pixel-art Pokémon Garden inline</li>
                 <li><span className="cmd-name">pokemon view &lt;name&gt;</span> - Spawn & view a live animated sprite in terminal</li>
               </ul>
               <p style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -302,6 +303,12 @@ export const TerminalLayout = ({
       case 'theme':
         toggleTheme();
         output = <p className="highlight">Toggling theme variables... Reload complete.</p>;
+        break;
+
+      case 'gameboy':
+      case 'play':
+        setTimeout(onNavigateToGameBoy, 200);
+        output = <p className="morph-text">Booting Retro GBA Console modules... Launching GameBoy GBA Emulator.</p>;
         break;
 
       case 'clear':

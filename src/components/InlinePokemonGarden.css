@@ -1,0 +1,126 @@
+.inline-garden-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 16px 0;
+  padding: 16px;
+  background: rgba(10, 15, 30, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  max-width: 100%;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.inline-garden-title {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent-cyan);
+  margin-bottom: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+}
+
+.inline-garden-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  width: 480px;
+  height: 288px;
+  max-width: 100%;
+  aspect-ratio: 10/6;
+  position: relative;
+  background-color: #55b848;
+  border: 4px solid #286b20;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+.inline-garden-tile {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.tile-grass-dark {
+  background-color: #4ba33e;
+}
+
+.tile-grass-light {
+  background-color: #55b848;
+}
+
+.tile-boundary {
+  background-color: #2b6124;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Pokemon sprite container positioning */
+.inline-pokemon-sprite {
+  position: absolute;
+  width: 10%; /* 1 column */
+  height: 16.666%; /* 1 row */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: left 1s ease-in-out, top 1s ease-in-out;
+  cursor: pointer;
+}
+
+.inline-pokemon-img {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+}
+
+.inline-pokemon-img.flipped {
+  transform: scaleX(-1);
+}
+
+.inline-pokemon-img:hover {
+  transform: scale(1.18);
+}
+
+.inline-pokemon-img.flipped:hover {
+  transform: scaleX(-1) scale(1.18);
+}
+
+.inline-garden-footer {
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
+.inline-garden-footer code {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--accent-cyan);
+}
+
+/* Mobile adjustments */
+@media (max-width: 540px) {
+  .inline-garden-grid {
+    width: 320px;
+    height: 192px;
+  }
+  .inline-garden-tile {
+    font-size: 0.8rem;
+  }
+  .inline-pokemon-img {
+    width: 32px;
+    height: 32px;
+  }
+}

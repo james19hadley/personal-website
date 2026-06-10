@@ -4,13 +4,13 @@ import { ProjectsLayout } from './components/ProjectsLayout';
 import { BlogLayout } from './components/BlogLayout';
 import { SpaceLayout } from './components/SpaceLayout';
 import { TerminalLayout } from './components/TerminalLayout';
-import { PokemonGarden } from './components/PokemonGarden';
+import { GameBoyConsole } from './components/GameBoyConsole';
 import createTmpFSModule from './wasm/tmpfs.js';
 
 
 
 function App() {
-  const [view, setView] = useState<'home' | 'projects' | 'blog' | 'space' | 'terminal' | 'pokemon-garden'>(() => {
+  const [view, setView] = useState<'home' | 'projects' | 'blog' | 'space' | 'terminal' | 'gameboy'>(() => {
     const saved = localStorage.getItem('zijh-view');
     if (saved === 'projects' || saved === 'blog' || saved === 'space' || saved === 'terminal') {
       return saved as 'projects' | 'blog' | 'space' | 'terminal';
@@ -87,10 +87,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (view !== 'terminal' && view !== 'pokemon-garden') {
+    if (view !== 'terminal' && view !== 'gameboy') {
       setPrevNonTermView(view);
     }
-    if (view !== 'pokemon-garden') {
+    if (view !== 'gameboy') {
       localStorage.setItem('zijh-view', view);
     }
   }, [view]);
@@ -108,7 +108,7 @@ function App() {
 
   // Keep focus visual styles in sync with activeIndex and view state changes after render
   useEffect(() => {
-    if (view === 'terminal' || view === 'pokemon-garden') return;
+    if (view === 'terminal' || view === 'gameboy') return;
 
     let selector = 'button, a, .blog-post-card';
     const modal = document.querySelector('.blog-modal-content');
@@ -139,7 +139,7 @@ function App() {
         return;
       }
 
-      if (view === 'terminal' || view === 'pokemon-garden') return;
+      if (view === 'terminal' || view === 'gameboy') return;
 
       const target = e.target as HTMLElement;
       // Skip if user is typing in form inputs (just in case they are added later)
@@ -259,7 +259,7 @@ function App() {
       {view === 'terminal' && (
         <TerminalLayout 
           onSwitchToGui={() => setView(prevNonTermView)} 
-          onNavigateToGarden={() => setView('pokemon-garden')}
+          onNavigateToGameBoy={() => setView('gameboy')}
           theme={theme}
           toggleTheme={toggleTheme}
           wasmModule={wasmModule}
@@ -269,8 +269,8 @@ function App() {
           setHistory={setTerminalHistory}
         />
       )}
-      {view === 'pokemon-garden' && (
-        <PokemonGarden 
+      {view === 'gameboy' && (
+        <GameBoyConsole 
           onBack={() => setView('terminal')} 
         />
       )}
@@ -281,8 +281,8 @@ function App() {
           <>Vim keys active: <code>J</code>/<code>L</code> to select // <code>Ctrl + `</code> for terminal</>
         ) : view === 'terminal' ? (
           <>Press <code>Ctrl + `</code> or type <code>exit</code> / <code>:q</code> to close shell</>
-        ) : view === 'pokemon-garden' ? (
-          <>Use D-Pad to steer wind // Click A button to spawn Pokémon // B to reset garden</>
+        ) : view === 'gameboy' ? (
+          <>Standard emulator controls: Arrow keys, Z/X, Enter, Shift // Click inside game to focus</>
         ) : (
           <>Vim keys: <code>J</code>/<code>K</code> select // <code>H</code>, <code>U</code>, <code>Q</code>, or <code>Esc</code> to go back</>
         )}
