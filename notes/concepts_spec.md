@@ -8,10 +8,10 @@ This document details two parallel concepts for Ivan's personal website. Both co
 
 ## 🧑‍💻 User Context & Requirements Baseline
 
-- **User**: Ivan Zharov (known online as **IJH** / Ivan James Hadley)
+- **User**: Ivan Zharov (known online as **ZIJH** / Ivan James Hadley)
 - **Status**: Final semester student at TU Darmstadt (TUD), Germany.
 - **GitHub Username**: `james19hadley`
-- **Main Domain**: `https://ijh.pages.dev/` (Cloudflare Pages)
+- **Main Domain**: `https://zijh.pages.dev/` (Cloudflare Pages)
 - **Integrations**: 
   - Dynamic GitHub repository loading via GitHub API (with support for client-side token or public repository fetching).
   - Since many repositories might be private or incomplete, the website must allow a **curated projects configuration file (JSON/JS)** to manually display, enrich, or mock projects (e.g., custom images, descriptions, tags) alongside fetched public repos.
@@ -22,7 +22,7 @@ This document details two parallel concepts for Ivan's personal website. Both co
 - **Stack Recommendation**: 
   - **Next.js (React) + Vanilla CSS / CSS Modules** (Recommended for SSG, SEO, and blog readability)
   - OR **Vite (React) + Vanilla CSS** (For lightweight single-page application structure).
-- **Hosting**: Cloudflare Pages (configured via `https://ijh.pages.dev/`).
+- **Hosting**: Cloudflare Pages (configured via `https://zijh.pages.dev/`).
 
 ---
 

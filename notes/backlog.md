@@ -1,6 +1,6 @@
 # Project Alignment & Core Vision
 
-- **Core Vision**: Create a personal website-card (identity card) for Ivan Zharov (**IJH** / `james19hadley`), a final-semester student at TU Darmstadt (TUD). It will include a personal showcase, a blog, and a projects portfolio with GitHub integration, hosted at `https://ijh.pages.dev/`.
+- **Core Vision**: Create a personal website-card (identity card) for Ivan Zharov (**ZIJH** / `james19hadley`), a final-semester student at TU Darmstadt (TUD). It will include a personal showcase, a blog, and a projects portfolio with GitHub integration, hosted at `https://zijh.pages.dev/`.
 - **Key Feature**: Distinction between "Handmade" (written completely by hand) and "Vibe-coded" (AI-assisted/generated) projects.
 - **Double Prototyping Approach**: Building two parallel concepts to compare:
   1. **Concept A (Bento Grid)**: A modern, premium bento-style grid card layout with interactive blocks and glassmorphism.
@@ -10,7 +10,7 @@
   - Parallel sub-projects initialized in separate directories (`concept-bento/` and `concept-terminal/`).
   - Active GitHub integration fetching projects (with fallback for private/unfinished repo display).
 - **GitHub**: `james19hadley`
-- **Domain**: `https://ijh.pages.dev/`
+- **Domain**: `https://zijh.pages.dev/`
 - **Starting Point**: Empty repository, SSH configured.
 
 ---
