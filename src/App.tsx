@@ -97,7 +97,6 @@ function App() {
 
   // Reset Vim focus highlight when switching pages
   useEffect(() => {
-    document.querySelectorAll('.vim-focused').forEach(el => el.classList.remove('vim-focused'));
     setActiveIndex(-1);
   }, [view]);
 
@@ -106,6 +105,29 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('zijh-theme', theme);
   }, [theme]);
+
+  // Keep focus visual styles in sync with activeIndex and view state changes after render
+  useEffect(() => {
+    if (view === 'terminal' || view === 'pokemon-garden') return;
+
+    let selector = 'button, a, .blog-post-card';
+    const modal = document.querySelector('.blog-modal-content');
+    if (modal) {
+      selector = '.blog-modal-content button, .blog-modal-content a';
+    }
+
+    const elements = Array.from(document.querySelectorAll(selector)) as HTMLElement[];
+    const visibleElements = elements.filter(el => el.offsetParent !== null);
+
+    // Remove focus class from all elements
+    document.querySelectorAll('.vim-focused').forEach(el => el.classList.remove('vim-focused'));
+
+    // Apply focus class and focus the DOM element
+    if (activeIndex >= 0 && activeIndex < visibleElements.length) {
+      visibleElements[activeIndex].classList.add('vim-focused');
+      visibleElements[activeIndex].focus();
+    }
+  }, [activeIndex, view]);
 
   // Global keyboard shortcuts (Ctrl+` for Terminal, and Vim keys for navigation)
   useEffect(() => {
@@ -129,7 +151,7 @@ function App() {
       const code = e.code;
 
       // Identify action based on both physical code (layout-independent) and semantic key
-      let action: 'forward' | 'backward' | 'back' | 'confirm' | 'escape' | null = null;
+      let action: 'forward' | 'backward' | 'confirm' | 'escape' | null = null;
       if (key === 'enter' || code === 'Enter') {
         action = 'confirm';
       } else if (key === 'escape' || code === 'Escape') {
@@ -140,19 +162,19 @@ function App() {
         if (isLatin) {
           if (key === 'j' || key === 'l') {
             action = 'forward';
-          } else if (key === 'k') {
+          } else if (key === 'k' || key === 'h') {
             action = 'backward';
-          } else if (key === 'h' || key === 'u' || key === 'q') {
-            action = 'back';
+          } else if (key === 'u' || key === 'q') {
+            action = 'escape';
           }
         } else {
           // Fall back to physical code if non-Latin layout (e.g. Russian ЙЦУКЕН)
           if (code === 'KeyJ' || code === 'KeyL') {
             action = 'forward';
-          } else if (code === 'KeyK') {
+          } else if (code === 'KeyK' || code === 'KeyH') {
             action = 'backward';
-          } else if (code === 'KeyH' || code === 'KeyU' || code === 'KeyQ') {
-            action = 'back';
+          } else if (code === 'KeyU' || code === 'KeyQ') {
+            action = 'escape';
           }
         }
       }
@@ -173,41 +195,25 @@ function App() {
 
       if (visibleElements.length === 0) return;
 
-      let newIndex = activeIndex;
-
       if (action === 'forward') {
         e.preventDefault();
-        newIndex = (activeIndex + 1) % visibleElements.length;
+        const newIndex = (activeIndex + 1) % visibleElements.length;
         setActiveIndex(newIndex);
       } else if (action === 'backward') {
         e.preventDefault();
-        newIndex = activeIndex <= 0 ? visibleElements.length - 1 : activeIndex - 1;
+        const newIndex = activeIndex <= 0 ? visibleElements.length - 1 : activeIndex - 1;
         setActiveIndex(newIndex);
-      } else if (action === 'back' || action === 'escape') {
+      } else if (action === 'escape') {
         e.preventDefault();
-        // If we are currently focusing an element on a content page, H/K acts as navigation unless index is -1
-        // Let's make H/U/Q/Esc go back to home if we are on a page, or navigate if they are focused
         if (view !== 'home') {
           setView('home');
-          return;
         }
-        
-        // If on home page, H can move backward
-        newIndex = activeIndex <= 0 ? visibleElements.length - 1 : activeIndex - 1;
-        setActiveIndex(newIndex);
       } else if (action === 'confirm') {
         if (activeIndex >= 0 && activeIndex < visibleElements.length) {
           e.preventDefault();
           visibleElements[activeIndex].click();
           setActiveIndex(-1);
         }
-      }
-
-      // Sync focus visual styles
-      visibleElements.forEach(el => el.classList.remove('vim-focused'));
-      if (newIndex >= 0 && newIndex < visibleElements.length) {
-        visibleElements[newIndex].classList.add('vim-focused');
-        visibleElements[newIndex].focus();
       }
     };
 
