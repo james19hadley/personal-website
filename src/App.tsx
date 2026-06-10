@@ -61,9 +61,23 @@ function App() {
       }
 
       const key = e.key.toLowerCase();
+      const code = e.code;
 
-      // Vim shortcut triggers: HJKL, Enter, Esc, U, Q
-      if (!['j', 'k', 'h', 'l', 'enter', 'escape', 'u', 'q'].includes(key)) {
+      // Identify action based on both physical code (layout-independent) and semantic key (Dvorak/English)
+      let action: 'forward' | 'backward' | 'back' | 'confirm' | 'escape' | null = null;
+      if (key === 'enter' || code === 'Enter') {
+        action = 'confirm';
+      } else if (key === 'escape' || code === 'Escape') {
+        action = 'escape';
+      } else if (key === 'j' || code === 'KeyJ' || key === 'l' || code === 'KeyL') {
+        action = 'forward';
+      } else if (key === 'k' || code === 'KeyK') {
+        action = 'backward';
+      } else if (key === 'h' || code === 'KeyH' || key === 'u' || code === 'KeyU' || key === 'q' || code === 'KeyQ') {
+        action = 'back';
+      }
+
+      if (!action) {
         return;
       }
 
@@ -81,17 +95,15 @@ function App() {
 
       let newIndex = activeIndex;
 
-      if (key === 'j' || key === 'l') {
-        // Navigate forward
+      if (action === 'forward') {
         e.preventDefault();
         newIndex = (activeIndex + 1) % visibleElements.length;
         setActiveIndex(newIndex);
-      } else if (key === 'k') {
-        // Navigate backward
+      } else if (action === 'backward') {
         e.preventDefault();
         newIndex = activeIndex <= 0 ? visibleElements.length - 1 : activeIndex - 1;
         setActiveIndex(newIndex);
-      } else if (key === 'h' || key === 'u' || key === 'q' || e.key === 'Escape') {
+      } else if (action === 'back' || action === 'escape') {
         e.preventDefault();
         // If we are currently focusing an element on a content page, H/K acts as navigation unless index is -1
         // Let's make H/U/Q/Esc go back to home if we are on a page, or navigate if they are focused
@@ -103,7 +115,7 @@ function App() {
         // If on home page, H can move backward
         newIndex = activeIndex <= 0 ? visibleElements.length - 1 : activeIndex - 1;
         setActiveIndex(newIndex);
-      } else if (e.key === 'Enter') {
+      } else if (action === 'confirm') {
         if (activeIndex >= 0 && activeIndex < visibleElements.length) {
           e.preventDefault();
           visibleElements[activeIndex].click();
