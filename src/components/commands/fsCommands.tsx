@@ -56,6 +56,17 @@ export const fsCommands: { [key: string]: Command } = {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        const MAX_SIZE = 500 * 1024; // 500 KB limit
+        if (file.size > MAX_SIZE) {
+          setHistory(prev => [
+            ...prev,
+            {
+              output: <p className="error-text">Failed to upload: File "{file.name}" ({Math.round(file.size / 1024)} KB) exceeds the maximum limit of 500 KB for the in-memory virtual filesystem.</p>
+            }
+          ]);
+          return;
+        }
+
         const reader = new FileReader();
         reader.onload = (event) => {
           const content = event.target?.result as string;
