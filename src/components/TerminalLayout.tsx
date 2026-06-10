@@ -2,14 +2,19 @@ import { useState, useRef, useEffect, type ReactNode } from 'react';
 import { projects } from '../data/projects';
 import { blogPosts } from '../data/blog';
 import { Terminal as TerminalIcon, Sun, Moon, Layout } from 'lucide-react';
-import createTmpFSModule from '../wasm/tmpfs.js';
 import './TerminalLayout.css';
 
 
 interface TerminalLayoutProps {
   onSwitchToGui: () => void;
+  onNavigateToGarden: () => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
+  wasmModule: any;
+  currentPwd: string;
+  setCurrentPwd: (pwd: string) => void;
+  history: LogEntry[];
+  setHistory: React.Dispatch<React.SetStateAction<LogEntry[]>>;
 }
 
 interface LogEntry {
@@ -18,40 +23,34 @@ interface LogEntry {
   output: ReactNode;
 }
 
+const POKEMON_POOL = [
+  { id: 1, name: 'bulbasaur' },
+  { id: 4, name: 'charmander' },
+  { id: 7, name: 'squirtle' },
+  { id: 25, name: 'pikachu' },
+  { id: 130, name: 'gyarados' },
+  { id: 149, name: 'dragonite' },
+  { id: 94, name: 'gengar' },
+  { id: 143, name: 'snorlax' },
+  { id: 133, name: 'eevee' },
+  { id: 151, name: 'mew' },
+  { id: 6, name: 'charizard' },
+  { id: 384, name: 'rayquaza' }
+];
 
-export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLayoutProps) => {
+export const TerminalLayout = ({ 
+  onSwitchToGui, 
+  onNavigateToGarden,
+  theme, 
+  toggleTheme,
+  wasmModule,
+  currentPwd,
+  setCurrentPwd,
+  history,
+  setHistory
+}: TerminalLayoutProps) => {
   const [inputVal, setInputVal] = useState('');
-  const [currentPwd, setCurrentPwd] = useState('/');
-  const [wasmModule, setWasmModule] = useState<any>(null);
-  const [history, setHistory] = useState<LogEntry[]>([
-    {
-      output: (
-        <div className="terminal-welcome">
-          <p className="welcome-ascii">
-{` ███████╗██╗██╗██╗  ██╗
- ╚══███╔╝██║██║██║  ██║
-   ███╔╝ ██║██║███████║
-  ███╔╝  ██║██║██╔══██║
- ███████╗██║██║██║  ██║
- ╚══════╝╚═╝╚═╝╚═╝  ╚═╝`}
-          </p>
-          <p className="welcome-text">Welcome to ZIJH Shell (v1.0.0)</p>
-          <p className="welcome-sub">Type <span className="highlight">help</span> to view available commands. Click <span className="highlight">gui</span> to morph back to grid.</p>
-        </div>
-      )
-    }
-  ]);
 
-  // Load and initialize WebAssembly C++ Filesystem (tmpfs-cpp)
-  useEffect(() => {
-    createTmpFSModule()
-      .then((mod: any) => {
-        setWasmModule(mod);
-      })
-      .catch((err: any) => {
-        console.error('Failed to load WebAssembly tmpfs module:', err);
-      });
-  }, []);
 
   
   const consoleEndRef = useRef<HTMLDivElement>(null);
@@ -97,6 +96,15 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
           const nextPwd = getPwdFn();
           setCurrentPwd(nextPwd);
 
+          // Serialize and save to cache
+          try {
+            const serializeFn = wasmModule.cwrap('serialize_fs', 'string', []);
+            const state = serializeFn();
+            localStorage.setItem('zijh-fs-state', state);
+          } catch (serializeErr) {
+            console.error('Failed to serialize filesystem state:', serializeErr);
+          }
+
           output = result ? (
             <pre className="wasm-output">{result}</pre>
           ) : null;
@@ -120,6 +128,7 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
                 <li><span className="cmd-name">theme</span> - Toggle light/dark UI themes</li>
                 <li><span className="cmd-name">clear</span> - Reset terminal window history</li>
                 <li><span className="cmd-name">secret</span> - Run custom system diagnostics</li>
+                <li><span className="cmd-name">pokemon [garden | view &lt;name&gt;]</span> - Access secret GameBoy garden or view sprites</li>
               </ul>
               <p className="section-title" style={{ marginTop: '16px' }}>C++ Virtual Filesystem (tmpfs-cpp Wasm):</p>
               <ul className="help-list">
@@ -159,6 +168,48 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
           </div>
         );
         break;
+
+      case 'pokemon': {
+        const subAction = args[0] ? args[0].toLowerCase() : '';
+        if (subAction === 'garden') {
+          setTimeout(onNavigateToGarden, 200);
+          output = <p className="morph-text">Booting Retro GBA Console modules... Entering Pokémon Garden.</p>;
+        } else if (subAction === 'view') {
+          const targetName = args[1] ? args[1].toLowerCase() : 'bulbasaur';
+          const pokeObj = POKEMON_POOL.find(p => p.name === targetName || p.id === parseInt(targetName));
+          if (pokeObj) {
+            const gifUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${pokeObj.id}.gif`;
+            output = (
+              <div className="cmd-output-pokemon-view">
+                <p>Viewing <span className="highlight text-capitalize">{pokeObj.name}</span> in console:</p>
+                <div style={{ marginTop: '8px', padding: '8px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', display: 'inline-block' }}>
+                  <img 
+                    src={gifUrl} 
+                    alt={pokeObj.name} 
+                    style={{ imageRendering: 'pixelated', width: '64px', height: '64px', objectFit: 'contain' }} 
+                  />
+                </div>
+              </div>
+            );
+          } else {
+            output = <p className="error-text">Pokémon "{targetName}" not found. Try: bulbasaur, pikachu, gyarados, dragonite, gengar, snorlax, eevee, mew, charizard, rayquaza.</p>;
+          }
+        } else {
+          output = (
+            <div className="cmd-output-pokemon-help">
+              <p className="section-title">Pokémon Command Line System:</p>
+              <ul className="help-list">
+                <li><span className="cmd-name">pokemon garden</span> - Launch the secret GameBoy Pokémon Garden</li>
+                <li><span className="cmd-name">pokemon view &lt;name&gt;</span> - Spawn & view a live animated sprite in terminal</li>
+              </ul>
+              <p style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                Valid Pokémon names: bulbasaur, charmander, squirtle, pikachu, gyarados, dragonite, gengar, snorlax, eevee, mew, charizard, rayquaza.
+              </p>
+            </div>
+          );
+        }
+        break;
+      }
 
       case 'projects': {
         const showHandmade = args.includes('--handmade');

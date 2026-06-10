@@ -28,7 +28,7 @@ docker run --rm \
     -I/website/src/wasm/include \
     -o /website/src/wasm/tmpfs.js \
     -std=c++20 \
-    -s EXPORTED_FUNCTIONS="['_execute_command','_get_pwd']" \
+    -s EXPORTED_FUNCTIONS="['_execute_command','_get_pwd','_serialize_fs','_create_directory_raw','_write_file_raw']" \
     -s EXPORTED_RUNTIME_METHODS="['ccall','cwrap','UTF8ToString']" \
     -s MODULARIZE=1 \
     -s EXPORT_NAME="createTmpFSModule" \

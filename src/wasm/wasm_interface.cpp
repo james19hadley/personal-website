@@ -114,4 +114,59 @@ const char* get_pwd() {
     return pwd_buffer.c_str();
 }
 
+void serialize_dir_recursive(std::shared_ptr<Directory> dir, std::string current_path, std::stringstream& ss, bool& first) {
+    if (!dir) return;
+
+    for (auto const& [name, node] : dir->getChildren()) {
+        std::string node_path = (current_path == "/" ? "" : current_path) + "/" + name;
+        if (node->isDir()) {
+            auto sub_dir = std::dynamic_pointer_cast<Directory>(node);
+            if (sub_dir) {
+                if (!first) ss << ",";
+                first = false;
+                ss << "{\"type\":\"D\",\"path\":\"" << node_path << "\"}";
+                serialize_dir_recursive(sub_dir, node_path, ss, first);
+            }
+        } else if (auto file = std::dynamic_pointer_cast<File>(node)) {
+            std::string content = std::string(file->read());
+            std::string escaped_content = "";
+            for (char c : content) {
+                if (c == '"') escaped_content += "\\\"";
+                else if (c == '\\') escaped_content += "\\\\";
+                else if (c == '\n') escaped_content += "\\n";
+                else if (c == '\r') escaped_content += "\\r";
+                else if (c == '\t') escaped_content += "\\t";
+                else escaped_content += c;
+            }
+            if (!first) ss << ",";
+            first = false;
+            ss << "{\"type\":\"F\",\"path\":\"" << node_path << "\",\"content\":\"" << escaped_content << "\"}";
+        }
+    }
+}
+
+const char* serialize_fs() {
+    static std::string json_output;
+    json_output.clear();
+
+    std::stringstream ss;
+    ss << "[";
+    bool first = true;
+    auto root_dir = std::dynamic_pointer_cast<Directory>(fs.resolvePath("/"));
+    serialize_dir_recursive(root_dir, "/", ss, first);
+    ss << "]";
+
+    json_output = ss.str();
+    return json_output.c_str();
+}
+
+void create_directory_raw(const char* path) {
+    fs.mkdir(path);
+}
+
+void write_file_raw(const char* path, const char* content) {
+    fs.touch(path);
+    fs.writeToFile(path, content);
+}
+
 }
