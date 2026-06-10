@@ -68,18 +68,7 @@ and key references that inspire the developer (such as Elite Dangerous, terminal
 ### 🧩 `TerminalLayout`
 - **Source File**: [TerminalLayout.tsx](file:///home/ging/prog/personal-website/src/components/TerminalLayout.tsx)
 - **Description**: Interactive terminal shell simulating a UNIX command line interface.
-Exposes commands (whoami, about, projects, blog, gui, theme, secret, pokemon, gameboy) and compiles/interacts with
-the C++ in-memory filesystem (tmpfs-cpp) loaded via WebAssembly. Implements automatic state serialization and caching in localStorage.
-- **Props / Parameters**:
-  - `onSwitchToGui` (`() => void`): Callback to swap layout back to Bento grid GUI
-  - `onNavigateToGameBoy` (`() => void`): Callback to load GameBoy console layout
-  - `theme` (`'dark' | 'light'`): Current active UI color theme
-  - `toggleTheme` (`() => void`): Color theme toggle helper
-  - `wasmModule` (`any`): Instantiated C++ WebAssembly filesystem module
-  - `currentPwd` (`string`): Active shell path inside C++ filesystem
-  - `setCurrentPwd` (`(pwd: string) => void`): Prompt working path updater
-  - `history` (`LogEntry[]`): History array storing executed commands and outputs
-  - `setHistory` (`React.Dispatch<any>`): State dispatcher for console log history
+Exposes registry-mapped commands and compiles/interacts with the C++ virtual filesystem.
 
 ---
 
@@ -99,4 +88,4 @@ to navigate and confirm interactive items (buttons, links, selects, cards). Supp
 
 ---
 
-*Last generated: 2026-06-10T19:47:39.309Z*
+*Last generated: 2026-06-10T19:55:31.827Z*
