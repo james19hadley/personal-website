@@ -2,7 +2,9 @@ import { useState, useRef, useEffect, type ReactNode } from 'react';
 import { projects } from '../data/projects';
 import { blogPosts } from '../data/blog';
 import { Terminal as TerminalIcon, Sun, Moon, Layout } from 'lucide-react';
+import createTmpFSModule from '../wasm/tmpfs.js';
 import './TerminalLayout.css';
+
 
 interface TerminalLayoutProps {
   onSwitchToGui: () => void;
@@ -12,11 +14,15 @@ interface TerminalLayoutProps {
 
 interface LogEntry {
   command?: string;
+  pwd?: string;
   output: ReactNode;
 }
 
+
 export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLayoutProps) => {
   const [inputVal, setInputVal] = useState('');
+  const [currentPwd, setCurrentPwd] = useState('/');
+  const [wasmModule, setWasmModule] = useState<any>(null);
   const [history, setHistory] = useState<LogEntry[]>([
     {
       output: (
@@ -35,6 +41,18 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
       )
     }
   ]);
+
+  // Load and initialize WebAssembly C++ Filesystem (tmpfs-cpp)
+  useEffect(() => {
+    createTmpFSModule()
+      .then((mod: any) => {
+        setWasmModule(mod);
+      })
+      .catch((err: any) => {
+        console.error('Failed to load WebAssembly tmpfs module:', err);
+      });
+  }, []);
+
   
   const consoleEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,26 +80,62 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
     const args = parts.slice(1);
 
     let output: ReactNode;
+    const wasmCommands = ['ls', 'pwd', 'cd', 'mkdir', 'touch', 'echo', 'cat', 'ln'];
 
-    switch (command) {
-      case 'help':
-      case '?':
-        output = (
-          <div className="cmd-output-help">
-            <p className="section-title">Available Commands:</p>
-            <ul className="help-list">
-              <li><span className="cmd-name">whoami</span> - Display current user identity & aliases</li>
-              <li><span className="cmd-name">about</span> - Print details about Ivan (ZIJH) & TUD studies</li>
-              <li><span className="cmd-name">projects [--handmade | --vibe]</span> - List creations by type</li>
-              <li><span className="cmd-name">blog [list | read &lt;id&gt;]</span> - Show log list or read a specific entry</li>
-              <li><span className="cmd-name">gui</span> / <span className="cmd-name">exit</span> - Switch layout back to home view</li>
-              <li><span className="cmd-name">theme</span> - Toggle light/dark UI themes</li>
-              <li><span className="cmd-name">clear</span> - Reset terminal window history</li>
-              <li><span className="cmd-name">secret</span> - Run custom system diagnostics</li>
-            </ul>
-          </div>
-        );
-        break;
+    if (wasmCommands.includes(command)) {
+      if (!wasmModule) {
+        output = <p className="error-text">WebAssembly tmpfs module is still initializing. Please wait a moment...</p>;
+      } else {
+        try {
+          const executeFn = wasmModule.cwrap('execute_command', 'string', ['string']);
+          const getPwdFn = wasmModule.cwrap('get_pwd', 'string', []);
+
+          // Run C++ function
+          const result = executeFn(trimmed);
+
+          // Retrieve updated directory
+          const nextPwd = getPwdFn();
+          setCurrentPwd(nextPwd);
+
+          output = result ? (
+            <pre className="wasm-output">{result}</pre>
+          ) : null;
+        } catch (err: any) {
+          output = <p className="error-text">Wasm error: {err.message || String(err)}</p>;
+        }
+      }
+    } else {
+      switch (command) {
+        case 'help':
+        case '?':
+          output = (
+            <div className="cmd-output-help">
+              <p className="section-title">Available Commands:</p>
+              <ul className="help-list">
+                <li><span className="cmd-name">whoami</span> - Display current user identity & aliases</li>
+                <li><span className="cmd-name">about</span> - Print details about Ivan (ZIJH) & TUD studies</li>
+                <li><span className="cmd-name">projects [--handmade | --vibe]</span> - List creations by type</li>
+                <li><span className="cmd-name">blog [list | read &lt;id&gt;]</span> - Show log list or read a specific entry</li>
+                <li><span className="cmd-name">gui</span> / <span className="cmd-name">exit</span> - Switch layout back to home view</li>
+                <li><span className="cmd-name">theme</span> - Toggle light/dark UI themes</li>
+                <li><span className="cmd-name">clear</span> - Reset terminal window history</li>
+                <li><span className="cmd-name">secret</span> - Run custom system diagnostics</li>
+              </ul>
+              <p className="section-title" style={{ marginTop: '16px' }}>C++ Virtual Filesystem (tmpfs-cpp Wasm):</p>
+              <ul className="help-list">
+                <li><span className="cmd-name">ls [path]</span> - List contents of current or specified directory</li>
+                <li><span className="cmd-name">cd &lt;path&gt;</span> - Change current working directory</li>
+                <li><span className="cmd-name">pwd</span> - Print absolute path of current directory</li>
+                <li><span className="cmd-name">mkdir &lt;path&gt;</span> - Create a new subdirectory</li>
+                <li><span className="cmd-name">touch &lt;path&gt;</span> - Create a new empty file</li>
+                <li><span className="cmd-name">echo &lt;content&gt; &lt;path&gt;</span> - Write text content to a file</li>
+                <li><span className="cmd-name">cat &lt;path&gt;</span> - View contents of a file</li>
+                <li><span className="cmd-name">ln -s &lt;target&gt; &lt;link&gt;</span> - Create a symbolic link</li>
+              </ul>
+            </div>
+          );
+          break;
+
 
       case 'whoami':
         output = (
@@ -227,8 +281,9 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
       default:
         output = <p className="error-text">Command not found: "{command}". Type "help" or "?" to show commands.</p>;
     }
+  }
 
-    setHistory(prev => [...prev, { command: cmdStr, output }]);
+    setHistory(prev => [...prev, { command: cmdStr, pwd: currentPwd, output }]);
     setInputVal('');
   };
 
@@ -262,7 +317,7 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
           <div key={idx} className="log-group">
             {log.command !== undefined && (
               <div className="input-prompt">
-                <span className="prompt-indicator">zijh ~ $</span>
+                <span className="prompt-indicator">zijh {log.pwd || '/'} $</span>
                 <span className="entered-command">{log.command}</span>
               </div>
             )}
@@ -274,7 +329,7 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
 
       {/* INPUT BAR */}
       <div className="console-input-bar">
-        <span className="prompt-indicator">zijh ~ $</span>
+        <span className="prompt-indicator">zijh {currentPwd} $</span>
         <input
           ref={inputRef}
           type="text"
