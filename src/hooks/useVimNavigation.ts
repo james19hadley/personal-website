@@ -73,7 +73,11 @@ export const useVimNavigation = ({ view, setView, prevNonTermView }: UseVimNavig
         
         if (targetView) {
           e.preventDefault();
-          setView(targetView);
+          if (view === targetView) {
+            setView(targetView === 'terminal' || targetView === 'gameboy' ? prevNonTermView : 'home');
+          } else {
+            setView(targetView);
+          }
           return;
         }
       }

@@ -4,6 +4,7 @@ import { MatrixRain } from './MatrixRain';
 import { TerminalHeader } from './TerminalHeader';
 import { TerminalShortcuts } from './TerminalShortcuts';
 import { commandsRegistry, type CommandContext, type TerminalLayoutProps } from './terminalCommands';
+import { renderColoredLs, getTabCompletion } from './terminalHelpers';
 import './TerminalLayout.css';
 
 const TERMINAL_COLORS_MAP: Record<string, { text: string; accent: string }> = { green: { text: '#22c55e', accent: '#4ade80' }, amber: { text: '#fbbf24', accent: '#f59e0b' }, yellow: { text: '#fbbf24', accent: '#f59e0b' }, cyan: { text: '#22d3ee', accent: '#06b6d4' }, violet: { text: '#c084fc', accent: '#8b5cf6' }, purple: { text: '#c084fc', accent: '#8b5cf6' }, red: { text: '#ef4444', accent: '#f87171' } };
@@ -39,17 +40,8 @@ export const TerminalLayout = ({
   const consoleEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    consoleEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [history]);
-
-  const focusInput = () => {
-    inputRef.current?.focus();
-  };
-
-  useEffect(() => {
-    focusInput();
-  }, []);
+  useEffect(() => { consoleEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [history]);
+  useEffect(() => { inputRef.current?.focus(); }, []);
 
   // Keyboard shortcut to toggle fullscreen (Alt + Enter or F11)
   useEffect(() => {
@@ -91,28 +83,13 @@ export const TerminalLayout = ({
     }
   };
 
-  const handleVimClose = () => {
-    setVimActive(false);
-    setVimFileName('');
-    setVimContent('');
-    setTimeout(() => inputRef.current?.focus(), 50);
-  };
+  const handleVimClose = () => { setVimActive(false); setVimFileName(''); setVimContent(''); setTimeout(() => inputRef.current?.focus(), 50); };
 
-  const customColors = TERMINAL_COLORS_MAP[termColor] || null;
-  const termStyles = customColors ? {
-    '--terminal-text': customColors.text,
-    '--terminal-accent': customColors.accent,
-    '--terminal-input': customColors.text,
-  } as React.CSSProperties : {};
+  const cc = TERMINAL_COLORS_MAP[termColor];
+  const termStyles = cc ? { '--terminal-text': cc.text, '--terminal-accent': cc.accent, '--terminal-input': cc.text } as React.CSSProperties : {};
 
-  const handleInputChange = (e: any) => {
-    setInputVal(e.target.value);
-    setCursorIndex(e.target.selectionStart || 0);
-  };
-
-  const updateCursor = (e: any) => {
-    setCursorIndex(e.target.selectionStart || 0);
-  };
+  const handleInputChange = (e: any) => { setInputVal(e.target.value); setCursorIndex(e.target.selectionStart || 0); };
+  const updateCursor = (e: any) => setCursorIndex(e.target.selectionStart || 0);
 
   const handleCommandRun = (cmdStr: string) => {
     const trimmed = cmdStr.trim();
@@ -123,9 +100,11 @@ export const TerminalLayout = ({
     const args = parts.slice(1);
 
     let output: ReactNode;
-    const wasmCommands = ['ls', 'pwd', 'cd', 'mkdir', 'touch', 'echo', 'cat', 'ln'];
+    const wasmCommands = ['pwd', 'cd', 'mkdir', 'touch', 'echo', 'cat', 'ln'];
 
-    if (wasmCommands.includes(command)) {
+    if (command === 'ls') {
+      output = renderColoredLs(args.join(' '), wasmModule, currentPwd);
+    } else if (wasmCommands.includes(command)) {
       if (!wasmModule) {
         output = <p className="error-text">WebAssembly tmpfs module is still initializing. Please wait a moment...</p>;
       } else {
@@ -190,6 +169,20 @@ export const TerminalLayout = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') return handleCommandRun(inputVal);
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const res = getTabCompletion(inputVal, currentPwd, wasmModule);
+      if (res.newInputVal !== undefined) {
+        setInputVal(res.newInputVal);
+        setTimeout(() => {
+          inputRef.current?.setSelectionRange(res.newInputVal!.length, res.newInputVal!.length);
+          setCursorIndex(res.newInputVal!.length);
+        }, 0);
+      } else if (res.historyOutput) {
+        setHistory(prev => [...prev, { command: inputVal, pwd: currentPwd, output: res.historyOutput }]);
+      }
+      return;
+    }
     const cmds = history.filter(h => h.command !== undefined).map(h => h.command as string);
     if (cmds.length === 0 && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) return;
 
@@ -226,7 +219,7 @@ export const TerminalLayout = ({
   return (
     <div 
       className={`terminal-container fade-in ${isMaximized ? 'maximized' : ''}`} 
-      onClick={focusInput}
+      onClick={() => inputRef.current?.focus()}
       style={termStyles}
     >
       {cmatrixActive && <MatrixRain onExit={() => setCmatrixActive(false)} />}
