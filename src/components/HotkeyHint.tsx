@@ -6,10 +6,10 @@ export const HotkeyHint = () => {
   return (
     <>
       <div className="hotkey-hint-container">
-        <div className="hotkey-trigger">
+        <button className="hotkey-trigger" aria-label="Keyboard Shortcuts">
           <span className="question-mark">❔</span>
           <span className="trigger-text">Shortcuts</span>
-        </div>
+        </button>
         <div className="hotkey-dropdown">
           <p className="dropdown-title">🎹 Keyboard Shortcuts</p>
           
@@ -67,11 +67,14 @@ export const HotkeyHint = () => {
           border-radius: 20px;
           cursor: pointer;
           color: var(--text-muted);
+          font-family: inherit;
           font-size: 0.75rem;
           transition: all 0.2s ease;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          outline: none;
         }
-        .hotkey-trigger:hover {
+        .hotkey-trigger:hover,
+        .hotkey-trigger.vim-focused {
           color: var(--accent-cyan);
           border-color: var(--accent-cyan);
           background: rgba(0, 0, 0, 0.8);
@@ -93,7 +96,8 @@ export const HotkeyHint = () => {
           transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-        .hotkey-hint-container:hover .hotkey-dropdown {
+        .hotkey-hint-container:hover .hotkey-dropdown,
+        .hotkey-hint-container:focus-within .hotkey-dropdown {
           opacity: 1;
           visibility: visible;
           transform: translateY(0);
@@ -141,7 +145,8 @@ export const HotkeyHint = () => {
           border-color: rgba(0, 0, 0, 0.08);
           color: var(--text-secondary);
         }
-        :root[data-theme='light'] .hotkey-trigger:hover {
+        :root[data-theme='light'] .hotkey-trigger:hover,
+        :root[data-theme='light'] .hotkey-trigger.vim-focused {
           background: #ffffff;
           color: var(--accent-cyan);
           border-color: var(--accent-cyan);

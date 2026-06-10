@@ -89,6 +89,14 @@ export const useVimNavigation = ({ view, setView, prevNonTermView }: UseVimNavig
           return;
         }
 
+        const trigger = document.querySelector('.hotkey-trigger') as HTMLElement;
+        if (trigger && document.activeElement === trigger) {
+          e.preventDefault();
+          trigger.blur();
+          setActiveIndex(-1);
+          return;
+        }
+
         if (view === 'terminal') {
           e.preventDefault();
           setView(prevNonTermView);
@@ -119,6 +127,29 @@ export const useVimNavigation = ({ view, setView, prevNonTermView }: UseVimNavig
       // If user is interacting with a select element, let arrow keys/enter work natively
       if (target.tagName === 'SELECT' && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Enter')) {
         return;
+      }
+
+      // Toggle Hotkeys panel with '?'
+      if (e.key === '?') {
+        const trigger = document.querySelector('.hotkey-trigger') as HTMLElement;
+        if (trigger) {
+          e.preventDefault();
+          if (document.activeElement === trigger) {
+            trigger.blur();
+            setActiveIndex(-1);
+          } else {
+            trigger.focus();
+            let sel = 'button, a:not(.p-tile-actions a), .blog-post-card, .project-tile-card, select';
+            if (document.querySelector('.blog-modal-content')) {
+              sel = '.blog-modal-content button, .blog-modal-content a';
+            }
+            const elms = Array.from(document.querySelectorAll(sel)) as HTMLElement[];
+            const visElms = elms.filter(el => el.offsetParent !== null);
+            const idx = visElms.indexOf(trigger);
+            if (idx !== -1) setActiveIndex(idx);
+          }
+          return;
+        }
       }
 
       const key = e.key.toLowerCase();
@@ -163,6 +194,26 @@ export const useVimNavigation = ({ view, setView, prevNonTermView }: UseVimNavig
       const visibleElements = elements.filter(el => el.offsetParent !== null);
 
       if (visibleElements.length === 0) return;
+
+      if (activeIndex === -1 && (action === 'forward' || action === 'backward')) {
+        e.preventDefault();
+        let startIndex = 0;
+        if (view === 'home') {
+          const homeNav = document.querySelector('.home-nav button') as HTMLElement;
+          if (homeNav) {
+            const idx = visibleElements.indexOf(homeNav);
+            if (idx !== -1) startIndex = idx;
+          }
+        } else {
+          const mainContent = document.querySelector('.project-tile-card, .blog-post-card, select') as HTMLElement;
+          if (mainContent) {
+            const idx = visibleElements.indexOf(mainContent);
+            if (idx !== -1) startIndex = idx;
+          }
+        }
+        setActiveIndex(action === 'forward' ? startIndex : visibleElements.length - 1);
+        return;
+      }
 
       if (action === 'forward') {
         e.preventDefault();
