@@ -77,10 +77,18 @@ and key references that inspire the developer (such as Elite Dangerous, terminal
 - **Props / Parameters**:
   - `onBack` (`() => void`): Navigation callback returning to the home screen
 
+### 🧩 `TerminalHeader`
+- **Source File**: [TerminalHeader.tsx](file:///home/ging/prog/personal-website/src/components/TerminalHeader.tsx)
+- **Description**: Header control bar for the interactive terminal. Houses window state toggles (maximize, theme switcher, GUI mode switch).
+
 ### 🧩 `TerminalLayout`
 - **Source File**: [TerminalLayout.tsx](file:///home/ging/prog/personal-website/src/components/TerminalLayout.tsx)
 - **Description**: Interactive terminal shell simulating a UNIX command line interface.
 Exposes registry-mapped commands and compiles/interacts with the C++ virtual filesystem.
+
+### 🧩 `TerminalShortcuts`
+- **Source File**: [TerminalShortcuts.tsx](file:///home/ging/prog/personal-website/src/components/TerminalShortcuts.tsx)
+- **Description**: Button shortcuts panel rendered at the bottom of the terminal screen, particularly useful for mobile keyboards.
 
 ### 🧩 `VimEditor`
 - **Source File**: [VimEditor.tsx](file:///home/ging/prog/personal-website/src/components/VimEditor.tsx)
@@ -110,4 +118,4 @@ to navigate and confirm interactive items (buttons, links, selects, cards). Supp
 
 ---
 
-*Last generated: 2026-06-10T19:57:01.832Z*
+*Last generated: 2026-06-10T20:21:04.372Z*

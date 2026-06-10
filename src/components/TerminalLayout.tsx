@@ -1,21 +1,12 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react';
-import { Terminal as TerminalIcon, Sun, Moon, Layout, Maximize2, Minimize2 } from 'lucide-react';
 import { VimEditor } from './VimEditor';
 import { MatrixRain } from './MatrixRain';
-import { commandsRegistry, type CommandContext, type LogEntry } from './terminalCommands';
+import { TerminalHeader } from './TerminalHeader';
+import { TerminalShortcuts } from './TerminalShortcuts';
+import { commandsRegistry, type CommandContext, type TerminalLayoutProps } from './terminalCommands';
 import './TerminalLayout.css';
 
-interface TerminalLayoutProps {
-  onSwitchToGui: () => void;
-  onNavigateToGameBoy: () => void;
-  theme: 'dark' | 'light';
-  toggleTheme: () => void;
-  wasmModule: any;
-  currentPwd: string;
-  setCurrentPwd: (pwd: string) => void;
-  history: LogEntry[];
-  setHistory: React.Dispatch<React.SetStateAction<LogEntry[]>>;
-}
+const TERMINAL_COLORS_MAP: Record<string, { text: string; accent: string }> = { green: { text: '#22c55e', accent: '#4ade80' }, amber: { text: '#fbbf24', accent: '#f59e0b' }, yellow: { text: '#fbbf24', accent: '#f59e0b' }, cyan: { text: '#22d3ee', accent: '#06b6d4' }, violet: { text: '#c084fc', accent: '#8b5cf6' }, purple: { text: '#c084fc', accent: '#8b5cf6' }, red: { text: '#ef4444', accent: '#f87171' } };
 
 /**
  * @component TerminalLayout
@@ -46,12 +37,10 @@ export const TerminalLayout = ({
   const consoleEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto scroll to bottom of console
   useEffect(() => {
     consoleEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [history]);
 
-  // Focus input on terminal click
   const focusInput = () => {
     inputRef.current?.focus();
   };
@@ -59,6 +48,21 @@ export const TerminalLayout = ({
   useEffect(() => {
     focusInput();
   }, []);
+
+  // Keyboard shortcut to toggle fullscreen (Alt + Enter or F11)
+  useEffect(() => {
+    const handleGlobalKey = (e: KeyboardEvent) => {
+      // Don't intercept when sub-overlays (Vim/cmatrix) are active
+      if (vimActive || cmatrixActive) return;
+      
+      if ((e.key === 'Enter' && e.altKey) || e.key === 'F11') {
+        e.preventDefault();
+        setIsMaximized(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKey);
+    return () => window.removeEventListener('keydown', handleGlobalKey);
+  }, [vimActive, cmatrixActive]);
 
   const openVimEditor = (filename: string) => {
     setVimFileName(filename);
@@ -115,26 +119,7 @@ export const TerminalLayout = ({
     }, 50);
   };
 
-  const getTerminalColors = () => {
-    switch (termColor) {
-      case 'green':
-        return { text: '#22c55e', accent: '#4ade80' };
-      case 'amber':
-      case 'yellow':
-        return { text: '#fbbf24', accent: '#f59e0b' };
-      case 'cyan':
-        return { text: '#22d3ee', accent: '#06b6d4' };
-      case 'violet':
-      case 'purple':
-        return { text: '#c084fc', accent: '#8b5cf6' };
-      case 'red':
-        return { text: '#ef4444', accent: '#f87171' };
-      default:
-        return null;
-    }
-  };
-
-  const customColors = getTerminalColors();
+  const customColors = TERMINAL_COLORS_MAP[termColor] || null;
   const termStyles = customColors ? {
     '--terminal-text': customColors.text,
     '--terminal-accent': customColors.accent,
@@ -208,6 +193,7 @@ export const TerminalLayout = ({
         setTerminalColor,
         startCMatrix: () => setCmatrixActive(true),
         openVimEditor,
+        toggleFullscreen: () => setIsMaximized(prev => !prev),
       };
       
       const res = commandsRegistry[command].execute(ctx);
@@ -252,30 +238,15 @@ export const TerminalLayout = ({
           onClose={handleVimClose}
         />
       )}
-      {/* HEADER CONTROLS */}
-      <header className="terminal-header-bar">
-        <div className="header-meta">
-          <TerminalIcon size={14} className="term-icon" />
-          <span>james19hadley@zijh-shell: ~</span>
-        </div>
-        <div className="header-controls">
-          <button 
-            onClick={() => setIsMaximized(!isMaximized)} 
-            className="term-ctrl-btn" 
-            title={isMaximized ? "Restore Window" : "Maximize Terminal"}
-          >
-            {isMaximized ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-          </button>
-          <button onClick={toggleTheme} className="term-ctrl-btn" title="Toggle Theme">
-            {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-          </button>
-          <button onClick={onSwitchToGui} className="term-ctrl-btn" title="Switch to Home GUI">
-            <Layout size={14} />
-          </button>
-        </div>
-      </header>
+      
+      <TerminalHeader
+        isMaximized={isMaximized}
+        setIsMaximized={setIsMaximized}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        onSwitchToGui={onSwitchToGui}
+      />
 
-      {/* CONSOLE DISPLAY */}
       <div className="console-display">
         {history.map((log, idx) => (
           <div key={idx} className="log-group">
@@ -291,7 +262,6 @@ export const TerminalLayout = ({
         <div ref={consoleEndRef} />
       </div>
 
-      {/* INPUT BAR */}
       <div className="console-input-bar">
         <span className="prompt-indicator">zijh {currentPwd} $</span>
         <div className="input-wrapper">
@@ -321,18 +291,7 @@ export const TerminalLayout = ({
         </div>
       </div>
 
-      {/* SHORTCUT BAR FOR MOBILE */}
-      <div className="terminal-shortcuts" onClick={e => e.stopPropagation()}>
-        <span className="shortcuts-label">Shortcuts:</span>
-        <div className="shortcut-buttons">
-          <button onClick={() => handleCommandRun('help')}>help</button>
-          <button onClick={() => handleCommandRun('about')}>about</button>
-          <button onClick={() => handleCommandRun('projects')}>projects</button>
-          <button onClick={() => handleCommandRun('blog list')}>blog</button>
-          <button onClick={() => handleCommandRun('secret')}>secret</button>
-          <button onClick={() => handleCommandRun('gui')}>gui</button>
-        </div>
-      </div>
+      <TerminalShortcuts onShortcutClick={handleCommandRun} />
     </div>
   );
 };
