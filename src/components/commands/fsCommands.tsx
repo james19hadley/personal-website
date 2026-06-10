@@ -127,7 +127,7 @@ export const fsCommands: { [key: string]: Command } = {
   df: {
     name: 'df',
     description: 'Display virtual disk space usage & limits',
-    execute: ({ wasmModule }) => {
+    execute: ({ args, wasmModule }) => {
       if (!wasmModule) {
         return <p className="error-text">Wasm module not loaded.</p>;
       }
@@ -143,6 +143,8 @@ export const fsCommands: { [key: string]: Command } = {
         const usedMb = (usedBytes / (1024 * 1024)).toFixed(2);
         const usePercent = ((usedBytes / totalBytes) * 100).toFixed(1);
 
+        const showHelp = args && (args.includes('--help') || args.includes('-h'));
+
         return (
           <div className="cmd-output-df">
             <p className="section-title">Virtual Disk Space Usage (Local Storage):</p>
@@ -150,9 +152,15 @@ export const fsCommands: { [key: string]: Command } = {
 {`Filesystem      Size        Used        Available   Use%
 zijh-vfs        ${totalMb} MB     ${usedMb} MB     ${freeMb} MB     ${usePercent}%`}
             </pre>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '8px', lineHeight: '1.4' }}>
-              <span className="highlight">Why is there a limit?</span> The virtual filesystem resides in browser Local Storage, which enforces a strict quota of **5.00 MB** per domain. To prevent crashes, individual file uploads are capped at **500 KB** and the runtime environment uses WebAssembly memory limits.
-            </p>
+            {showHelp ? (
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '8px', lineHeight: '1.4' }}>
+                <span className="highlight font-bold">Why is there a limit?</span> The virtual filesystem resides in browser Local Storage, which enforces a strict quota of <span className="highlight">5.00 MB</span> per domain. To prevent crashes, individual file uploads are capped at <span className="highlight">500 KB</span> and the runtime environment uses WebAssembly memory limits.
+              </p>
+            ) : (
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Type <span className="highlight">df --help</span> or <span className="highlight">df -h</span> to view details about storage limits.
+              </p>
+            )}
           </div>
         );
       } catch (err: any) {
