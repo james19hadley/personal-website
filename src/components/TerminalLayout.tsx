@@ -174,7 +174,7 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
       case 'gui':
         // Transition back
         setTimeout(onSwitchToGui, 200);
-        output = <p className="morph-text">Reconfiguring UI modules... switching to grid.</p>;
+        output = <p className="morph-text">Reconfiguring UI modules... returning home.</p>;
         break;
 
       case 'theme':
@@ -233,7 +233,7 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
           <button onClick={toggleTheme} className="term-ctrl-btn" title="Toggle Theme">
             {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
           </button>
-          <button onClick={onSwitchToGui} className="term-ctrl-btn" title="Switch to Bento GUI">
+          <button onClick={onSwitchToGui} className="term-ctrl-btn" title="Switch to Home GUI">
             <Layout size={14} />
           </button>
         </div>

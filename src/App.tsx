@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
-import { BentoLayout } from './components/BentoLayout';
+import { HomeLayout } from './components/HomeLayout';
+import { ProjectsLayout } from './components/ProjectsLayout';
+import { BlogLayout } from './components/BlogLayout';
 import { TerminalLayout } from './components/TerminalLayout';
 
 function App() {
-  const [mode, setMode] = useState<'gui' | 'cli'>(() => {
-    const saved = localStorage.getItem('zijh-mode');
-    return (saved === 'cli' ? 'cli' : 'gui');
+  const [view, setView] = useState<'home' | 'projects' | 'blog' | 'terminal'>(() => {
+    const saved = localStorage.getItem('zijh-view');
+    if (saved === 'projects' || saved === 'blog' || saved === 'terminal') {
+      return saved as 'projects' | 'blog' | 'terminal';
+    }
+    return 'home';
   });
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -13,28 +18,33 @@ function App() {
     return (saved === 'light' ? 'light' : 'dark');
   });
 
+  // Track previous view for terminal hotkey toggle
+  const [prevNonTermView, setPrevNonTermView] = useState<'home' | 'projects' | 'blog'>('home');
+
+  useEffect(() => {
+    if (view !== 'terminal') {
+      setPrevNonTermView(view);
+    }
+    localStorage.setItem('zijh-view', view);
+  }, [view]);
+
   // Sync theme attribute to HTML tag
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('zijh-theme', theme);
   }, [theme]);
 
-  // Sync mode to local storage
-  useEffect(() => {
-    localStorage.setItem('zijh-mode', mode);
-  }, [mode]);
-
-  // Global hotkey listener (Ctrl + `) to toggle mode
+  // Global hotkey listener (Ctrl + `) to toggle Terminal mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === '`') {
         e.preventDefault();
-        setMode(prev => prev === 'gui' ? 'cli' : 'gui');
+        setView(prev => prev === 'terminal' ? prevNonTermView : 'terminal');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [prevNonTermView]);
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -48,24 +58,35 @@ function App() {
         <div className="ambient-orb orb-cyan"></div>
       </div>
 
-      {/* Dynamic Switcher */}
-      {mode === 'gui' ? (
-        <BentoLayout 
-          onSwitchToCli={() => setMode('cli')} 
+      {/* Dynamic View Switching */}
+      {view === 'home' && (
+        <HomeLayout 
+          onNavigate={setView} 
           theme={theme}
           toggleTheme={toggleTheme}
         />
-      ) : (
+      )}
+      {view === 'projects' && (
+        <ProjectsLayout 
+          onBack={() => setView('home')} 
+        />
+      )}
+      {view === 'blog' && (
+        <BlogLayout 
+          onBack={() => setView('home')} 
+        />
+      )}
+      {view === 'terminal' && (
         <TerminalLayout 
-          onSwitchToGui={() => setMode('gui')} 
+          onSwitchToGui={() => setView(prevNonTermView)} 
           theme={theme}
           toggleTheme={toggleTheme}
         />
       )}
 
-      {/* Micro floating switch indicator at the very bottom corner */}
+      {/* Floating hotkey helper */}
       <div className="hotkey-hint">
-        Press <code>Ctrl + `</code> to toggle interface
+        Press <code>Ctrl + `</code> to toggle terminal
       </div>
 
       <style>{`
