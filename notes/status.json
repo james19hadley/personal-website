@@ -1,0 +1,18 @@
+{
+  "name": "🌐 Web — Personal Website, Blog & Internet Identity",
+  "type": "LEARN",
+  "category": "Product",
+  "status": "Active",
+  "credit_points": 0,
+  "exam_date": "no exam",
+  "moodle_url": "https://moodle.tu-darmstadt.de/course/view.php?id=...",
+  "repo_url": "git@github.com:james19hadley/personal-website.git",
+  "ai_chat": "",
+  "progress_text": "Selected domain ijh.pages.dev and moniker IJH. Initializing parallel Bento Grid and Terminal CLI prototypes.",
+  "next_action": "Assist user in starting the chosen project path or initializing concepts.",
+  "next_deadline": "2026-12-31",
+  "next_deadline_description": "First deliverable",
+  "sync_needed": true,
+  "last_synchronized": "2026-06-06T11:58:54Z",
+  "sync_to_sheets": false
+}
