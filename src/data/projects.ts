@@ -44,6 +44,7 @@ export const projects: Project[] = [
     type: 'vibecoded',
     techStack: ['Node.js', 'Electron', 'TailwindCSS'],
     githubUrl: 'https://github.com/james19hadley/ed-hud-router',
+    liveUrl: 'https://inara.cz/elite/cmdr/463635/',
     status: 'completed'
   },
   {

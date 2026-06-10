@@ -70,14 +70,26 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
           <div className="cmd-output-help">
             <p className="section-title">Available Commands:</p>
             <ul className="help-list">
-              <li><span className="cmd-name">about</span> - Print info about Ivan (ZIJH) & TUD studies</li>
+              <li><span className="cmd-name">whoami</span> - Display current user identity & aliases</li>
+              <li><span className="cmd-name">about</span> - Print details about Ivan (ZIJH) & TUD studies</li>
               <li><span className="cmd-name">projects [--handmade | --vibe]</span> - List creations by type</li>
               <li><span className="cmd-name">blog [list | read &lt;id&gt;]</span> - Show log list or read a specific entry</li>
-              <li><span className="cmd-name">gui</span> - Switch layout to Bento Grid GUI</li>
+              <li><span className="cmd-name">gui</span> / <span className="cmd-name">exit</span> - Switch layout back to home view</li>
               <li><span className="cmd-name">theme</span> - Toggle light/dark UI themes</li>
               <li><span className="cmd-name">clear</span> - Reset terminal window history</li>
               <li><span className="cmd-name">secret</span> - Run custom system diagnostics</li>
             </ul>
+          </div>
+        );
+        break;
+
+      case 'whoami':
+        output = (
+          <div className="cmd-output-whoami">
+            <p><span className="highlight font-bold">identity:</span> Ivan Zharov (zijh)</p>
+            <p><span className="highlight font-bold">systems-user:</span> ging</p>
+            <p><span className="highlight font-bold">cmdr:</span> Jack Heather (Elite Dangerous)</p>
+            <p><span className="highlight font-bold">github:</span> james19hadley</p>
           </div>
         );
         break;
@@ -172,6 +184,8 @@ export const TerminalLayout = ({ onSwitchToGui, theme, toggleTheme }: TerminalLa
       }
 
       case 'gui':
+      case 'exit':
+      case 'quit':
         // Transition back
         setTimeout(onSwitchToGui, 200);
         output = <p className="morph-text">Reconfiguring UI modules... returning home.</p>;
