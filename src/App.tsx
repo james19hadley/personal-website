@@ -110,7 +110,7 @@ function App() {
   useEffect(() => {
     if (view === 'terminal' || view === 'gameboy') return;
 
-    let selector = 'button, a, .blog-post-card';
+    let selector = 'button, a:not(.p-tile-actions a), .blog-post-card, .project-tile-card';
     const modal = document.querySelector('.blog-modal-content');
     if (modal) {
       selector = '.blog-modal-content button, .blog-modal-content a';
@@ -184,7 +184,7 @@ function App() {
       }
 
       // Query current list of interactive items
-      let selector = 'button, a, .blog-post-card';
+      let selector = 'button, a:not(.p-tile-actions a), .blog-post-card, .project-tile-card';
       const modal = document.querySelector('.blog-modal-content');
       if (modal) {
         selector = '.blog-modal-content button, .blog-modal-content a';
