@@ -177,3 +177,42 @@ export const getTabCompletion = (
   }
   return {};
 };
+
+/**
+ * Computes the Levenshtein edit distance between two strings.
+ */
+const getLevenshteinDistance = (a: string, b: string): number => {
+  const tmp: number[][] = [];
+  for (let i = 0; i <= a.length; i++) tmp[i] = [i];
+  for (let j = 0; j <= b.length; j++) tmp[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      tmp[i][j] = Math.min(
+        tmp[i - 1][j] + 1,
+        tmp[i][j - 1] + 1,
+        tmp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+    }
+  }
+  return tmp[a.length][b.length];
+};
+
+/**
+ * Finds the closest matching terminal command if a user makes a typo.
+ */
+export const getClosestCommand = (command: string): string | null => {
+  const commands = Object.keys(commandsRegistry);
+  const wasmCommands = ['pwd', 'cd', 'mkdir', 'touch', 'echo', 'cat', 'ln', 'ls'];
+  const allCommands = [...commands, ...wasmCommands];
+  
+  let bestMatch: string | null = null;
+  let minDistance = 999;
+  for (const c of allCommands) {
+    const dist = getLevenshteinDistance(command, c);
+    if (dist < minDistance) {
+      minDistance = dist;
+      bestMatch = c;
+    }
+  }
+  return minDistance <= 2 ? bestMatch : null;
+};

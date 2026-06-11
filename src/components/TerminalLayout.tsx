@@ -4,7 +4,8 @@ import { MatrixRain } from './MatrixRain';
 import { TerminalHeader } from './TerminalHeader';
 import { TerminalShortcuts } from './TerminalShortcuts';
 import { commandsRegistry, type CommandContext, type TerminalLayoutProps } from './terminalCommands';
-import { renderColoredLs, getTabCompletion } from './terminalHelpers';
+import { renderColoredLs, getTabCompletion, getClosestCommand } from './terminalHelpers';
+import { useVisualViewport } from '../hooks/useVisualViewport';
 import './TerminalLayout.css';
 
 const TERMINAL_COLORS_MAP: Record<string, { text: string; accent: string }> = { green: { text: '#22c55e', accent: '#4ade80' }, amber: { text: '#fbbf24', accent: '#f59e0b' }, yellow: { text: '#fbbf24', accent: '#f59e0b' }, cyan: { text: '#22d3ee', accent: '#06b6d4' }, violet: { text: '#c084fc', accent: '#8b5cf6' }, purple: { text: '#c084fc', accent: '#8b5cf6' }, red: { text: '#ef4444', accent: '#f87171' } };
@@ -36,6 +37,7 @@ export const TerminalLayout = ({
   const [vimContent, setVimContent] = useState('');
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [inputDraft, setInputDraft] = useState('');
+  const viewportHeight = useVisualViewport(true);
   const [commandHistory, setCommandHistory] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem('zijh-terminal-history') || '[]'); } catch { return []; }
   });
@@ -141,7 +143,22 @@ export const TerminalLayout = ({
       }
       output = res || null;
     } else {
-      output = <p className="error-text">Command not found: "{command}". Type "help" or "?" to show commands.</p>;
+      const suggestion = getClosestCommand(command);
+      if (suggestion) {
+        output = (
+          <p className="error-text">
+            Command not found: "{command}". Did you mean{' '}
+            <button 
+              className="term-link-btn" 
+              onClick={() => handleCommandRun([suggestion, ...args].join(' '))}
+            >
+              {suggestion}
+            </button>?
+          </p>
+        );
+      } else {
+        output = <p className="error-text">Command not found: "{command}". Type "help" or "?" to show commands.</p>;
+      }
     }
 
     setHistory(prev => [...prev, { command: cmdStr, pwd: currentPwd, output }]);
@@ -204,7 +221,10 @@ export const TerminalLayout = ({
     <div 
       className={`terminal-container fade-in ${isMaximized ? 'maximized' : ''}`} 
       onClick={() => inputRef.current?.focus()}
-      style={termStyles}
+      style={{
+        ...termStyles,
+        ...(viewportHeight ? { height: `${viewportHeight}px`, minHeight: 'auto' } : {})
+      }}
     >
       {cmatrixActive && <MatrixRain onExit={() => setCmatrixActive(false)} />}
       {vimActive && (

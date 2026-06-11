@@ -69,14 +69,14 @@ function App() {
     {
       output: (
         <div className="terminal-welcome">
-          <p className="welcome-ascii">
+          <pre className="welcome-ascii">
 {` ███████╗██╗██╗██╗  ██╗
  ╚══███╔╝██║██║██║  ██║
    ███╔╝ ██║██║███████║
   ███╔╝  ██║██║██╔══██║
  ███████╗██║██║██║  ██║
  ╚══════╝╚═╝╚═╝╚═╝  ╚═╝`}
-          </p>
+          </pre>
           <p className="welcome-text">Welcome to ZIJH Shell (v1.0.0)</p>
           <p className="welcome-sub">Type <span className="highlight">help</span> to view available commands. Click <span className="highlight">gui</span> to morph back to grid.</p>
         </div>

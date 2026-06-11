@@ -119,11 +119,13 @@
 /* Welcome ASCII */
 .welcome-ascii {
   color: var(--accent-cyan);
-  font-size: 0.75rem;
+  font-size: clamp(0.35rem, 3.2vw, 0.75rem);
   line-height: 1.25;
   white-space: pre;
   margin-bottom: 12px;
   overflow-x: auto;
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 
 .welcome-text {
@@ -444,6 +446,18 @@
   line-height: 1.2;
   white-space: pre;
   margin-top: 12px;
+  overflow-x: auto;
+  max-width: 100%;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.df-output {
+  overflow-x: auto;
+  max-width: 100%;
+  white-space: pre;
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 
 .wasm-output {
