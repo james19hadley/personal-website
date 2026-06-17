@@ -45,6 +45,7 @@ Instead of simulating terminal commands in JavaScript, the site runs Ivan's actu
 - **Glibc Mock Header**: Emscripten doesn't support the Linux-specific `<bits/types/cookie_io_functions_t.h>` header. We bypassed this without altering the C++ repo by providing an empty mock header at [src/wasm/include/bits/types/cookie_io_functions_t.h](file:///home/ging/prog/personal-website/src/wasm/include/bits/types/cookie_io_functions_t.h) and instructing the compiler to use it via `-I`.
 - **State Preservation**: The `wasmModule` instance, command `history` logs, and `currentPwd` path are lifted to the root state (`App.tsx`). This prevents the filesystem state from resetting when switching between GUI and CLI modes.
 - **Single-File Bundle**: Compiling with `-s SINGLE_FILE=1` embeds the Wasm binary directly inside the JavaScript file as a base64 string, facilitating fast static hosting with zero network latency or MIME-type configuration issues.
+- **Storage Limits & Future Scaling (IndexedDB / OPFS)**: Currently, the persistent filesystem is serialized to JSON and stored in browser `localStorage` (with a hard 5.00 MB limit per domain). To scale past this constraint in the future, we can transition the persistence layer to **IndexedDB** or the **Origin Private File System (OPFS)**. Since IndexedDB is fully asynchronous and allocates up to 50%+ of the user's free disk space (hundreds of MBs to GBs), it would bypass the LocalStorage quota limit completely and support uploading larger binary files and virtual directories.
 
 ### 2. Layout-Independent Vim Hotkeys
 The site features Vim-like keyboard navigation (`HJKL`, `U`, `Q`, `Esc`, `Enter`) to browse and trigger elements without a mouse.
@@ -102,3 +103,7 @@ To implement retro GameBoy / Pokémon FireRed aesthetic elements and Easter eggs
 ### 3. Sprite Sources & Generation
 - **PokéAPI Github Repository**: Front-facing sprites of Gen 1-3 can be pulled directly from raw git urls on [PokeAPI/sprites](https://github.com/PokeAPI/sprites).
 - **AI Sprite Generation**: To generate custom pixel-art assets, use stable diffusion models with a `pixel art sprite sheet` LoRA, prompting with `8-bit pixel art sprite, isolated on solid white background`. Use Python scripts to slice sheets or crop backgrounds automatically.
+
+### 4. Blog Markdown Parsing & Formatting
+- **Rich Markdown Rendering**: Currently, the blog articles are stored as markdown strings but rendered as raw text (meaning headings like `###` and bold indicators like `**` are shown literally). In the future, we should implement a lightweight custom markdown-to-JSX parser (similar to the regex VimHighlighter approach) or integrate `react-markdown` to render clean HTML headings, bold text, code snippets, and lists properly in the UI modal.
+

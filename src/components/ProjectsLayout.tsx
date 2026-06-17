@@ -1,18 +1,19 @@
 import { projects } from '../data/projects';
-import { ArrowLeft, ExternalLink, Hammer, Sparkles } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Hammer, Sparkles, BookOpen } from 'lucide-react';
+import { blogPosts } from '../data/blog';
 import './ProjectsLayout.css';
 
 interface ProjectsLayoutProps {
   onBack: () => void;
+  onNavigateToBlog?: (projectId: string) => void;
 }
 
 /**
  * @component ProjectsLayout
  * @description Project list layout with classification filters. Houses lists of Handmade 🛠️ vs Vibe-coded ⚡ creations,
  * with tech stacks and GitHub repository details. Card-level click handlers navigate to external URLs.
- * @param {() => void} onBack - Navigation callback returning to the home screen
  */
-export const ProjectsLayout = ({ onBack }: ProjectsLayoutProps) => {
+export const ProjectsLayout = ({ onBack, onNavigateToBlog }: ProjectsLayoutProps) => {
   const vibeProjects = projects.filter(p => p.type === 'vibecoded');
   const handmadeProjects = projects.filter(p => p.type === 'handmade');
 
@@ -21,6 +22,10 @@ export const ProjectsLayout = ({ onBack }: ProjectsLayoutProps) => {
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
+  };
+
+  const projectHasBlog = (projectId: string) => {
+    return blogPosts.some(post => post.projectId === projectId);
   };
 
   return (
@@ -75,6 +80,18 @@ export const ProjectsLayout = ({ onBack }: ProjectsLayoutProps) => {
                         <ExternalLink size={16} />
                       </a>
                     )}
+                    {projectHasBlog(p.id) && (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onNavigateToBlog) onNavigateToBlog(p.id);
+                        }} 
+                        className="project-blog-btn"
+                        title="read dev logs"
+                      >
+                        <BookOpen size={16} />
+                      </button>
+                    )}
                   </div>
                 </article>
               ))}
@@ -117,6 +134,18 @@ export const ProjectsLayout = ({ onBack }: ProjectsLayoutProps) => {
                       <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" title="live demo" onClick={e => e.stopPropagation()}>
                         <ExternalLink size={16} />
                       </a>
+                    )}
+                    {projectHasBlog(p.id) && (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onNavigateToBlog) onNavigateToBlog(p.id);
+                        }} 
+                        className="project-blog-btn"
+                        title="read dev logs"
+                      >
+                        <BookOpen size={16} />
+                      </button>
                     )}
                   </div>
                 </article>

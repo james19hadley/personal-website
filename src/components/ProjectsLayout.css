@@ -118,7 +118,8 @@
   gap: 8px;
 }
 
-.p-tile-actions a {
+.p-tile-actions a,
+.p-tile-actions .project-blog-btn {
   color: var(--text-muted);
   width: 32px;
   height: 32px;
@@ -129,20 +130,29 @@
   transition: var(--transition-fast);
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  padding: 0;
 }
 
-:root[data-theme='light'] .p-tile-actions a {
+:root[data-theme='light'] .p-tile-actions a,
+:root[data-theme='light'] .p-tile-actions .project-blog-btn {
   background: rgba(0, 0, 0, 0.01);
   border-color: rgba(0, 0, 0, 0.03);
 }
 
-.p-tile-actions a:hover {
+.p-tile-actions a:hover,
+.p-tile-actions .project-blog-btn:hover {
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-:root[data-theme='light'] .p-tile-actions a:hover {
+.p-tile-actions .project-blog-btn:hover {
+  color: var(--accent-cyan);
+}
+
+:root[data-theme='light'] .p-tile-actions a:hover,
+:root[data-theme='light'] .p-tile-actions .project-blog-btn:hover {
   background: rgba(0, 0, 0, 0.05);
 }
 

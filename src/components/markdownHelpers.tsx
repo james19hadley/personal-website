@@ -7,12 +7,13 @@ const parseInlineMarkdown = (text: string): ReactNode[] => {
   // Groups:
   // 1, 2: **bold**
   // 3, 4: `code`
-  // 5, 6, 7: [label](url)
-  const regex = /(\*\*([^*]+)\*\*)|(`([^`]+)`)|(\[([^\]]+)\]\(([^)]+)\))/g;
+  // 5, 6, 7: ![alt](url) (image)
+  // 8, 9, 10: [label](url) (link)
+  const regex = /(\*\*([^*]+)\*\*)|(`([^`]+)`)|(!\[([^\]]*)\]\(([^)]+)\))|(\[([^\]]+)\]\(([^)]+)\))/g;
   const parts = text.split(regex);
   const result: ReactNode[] = [];
 
-  for (let i = 0; i < parts.length; i += 8) {
+  for (let i = 0; i < parts.length; i += 11) {
     if (parts[i]) {
       result.push(parts[i]);
     }
@@ -23,8 +24,25 @@ const parseInlineMarkdown = (text: string): ReactNode[] => {
         result.push(<code key={i} className="vh-number" style={{ background: 'rgba(255,255,255,0.06)', padding: '2px 5px', borderRadius: '4px', fontFamily: 'var(--font-mono)', fontSize: '0.85em' }}>{parts[i + 4]}</code>);
       } else if (parts[i + 6] !== undefined && parts[i + 7] !== undefined) {
         result.push(
-          <a key={i} href={parts[i + 7]} target="_blank" rel="noopener noreferrer" className="term-link">
-            {parts[i + 6]}
+          <img 
+            key={i} 
+            src={parts[i + 7]} 
+            alt={parts[i + 6]} 
+            className="blog-image" 
+            style={{ 
+              maxWidth: '100%', 
+              borderRadius: '8px', 
+              margin: '16px auto', 
+              display: 'block', 
+              boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+              border: '1px solid rgba(255,255,255,0.08)'
+            }} 
+          />
+        );
+      } else if (parts[i + 9] !== undefined && parts[i + 10] !== undefined) {
+        result.push(
+          <a key={i} href={parts[i + 10]} target="_blank" rel="noopener noreferrer" className="term-link">
+            {parts[i + 9]}
           </a>
         );
       }

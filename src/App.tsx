@@ -18,10 +18,21 @@ import { HotkeyHint } from './components/HotkeyHint';
  * Integrates useVimNavigation hook to enable global Vim-style keyboard shortcuts.
  */
 function App() {
+  const [projectFilter, setProjectFilter] = useState<string | null>(() => {
+    const hashStr = window.location.hash.replace('#/', '');
+    const [baseView, queryStr] = hashStr.split('?');
+    if (baseView === 'blog' && queryStr) {
+      const params = new URLSearchParams(queryStr);
+      return params.get('project');
+    }
+    return null;
+  });
+
   const [view, setView] = useState<'home' | 'projects' | 'blog' | 'space' | 'terminal' | 'gameboy'>(() => {
-    const hash = window.location.hash.replace('#/', '');
-    if (['projects', 'blog', 'space', 'terminal', 'gameboy'].includes(hash)) {
-      return hash as any;
+    const hashStr = window.location.hash.replace('#/', '');
+    const [baseView] = hashStr.split('?');
+    if (['projects', 'blog', 'space', 'terminal', 'gameboy'].includes(baseView)) {
+      return baseView as any;
     }
     const saved = localStorage.getItem('zijh-view');
     if (saved === 'projects' || saved === 'blog' || saved === 'space' || saved === 'terminal') {
@@ -39,23 +50,33 @@ function App() {
   const [prevNonTermView, setPrevNonTermView] = useState<'home' | 'projects' | 'blog' | 'space'>('home');
   useVimNavigation({ view, setView, prevNonTermView });
 
-  // Sync view state to URL hash
+  // Sync view state and project filter to URL hash
   useEffect(() => {
     if (view === 'home') {
       window.history.pushState(null, '', window.location.pathname);
+    } else if (view === 'blog' && projectFilter) {
+      window.location.hash = `#/${view}?project=${projectFilter}`;
     } else {
       window.location.hash = `#/${view}`;
     }
-  }, [view]);
+  }, [view, projectFilter]);
 
   // Handle browser back/forward navigation
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.replace('#/', '');
-      if (['home', 'projects', 'blog', 'space', 'terminal', 'gameboy'].includes(hash)) {
-        setView(hash as any);
-      } else if (!hash) {
+      const hashStr = window.location.hash.replace('#/', '');
+      const [baseView, queryStr] = hashStr.split('?');
+      if (['home', 'projects', 'blog', 'space', 'terminal', 'gameboy'].includes(baseView)) {
+        setView(baseView as any);
+        if (baseView === 'blog' && queryStr) {
+          const params = new URLSearchParams(queryStr);
+          setProjectFilter(params.get('project') || null);
+        } else {
+          setProjectFilter(null);
+        }
+      } else if (!hashStr) {
         setView('home');
+        setProjectFilter(null);
       }
     };
     window.addEventListener('hashchange', handleHashChange);
@@ -185,11 +206,17 @@ function App() {
       {view === 'projects' && (
         <ProjectsLayout 
           onBack={() => setView('home')} 
+          onNavigateToBlog={(projectId) => {
+            setProjectFilter(projectId);
+            setView('blog');
+          }}
         />
       )}
       {view === 'blog' && (
         <BlogLayout 
           onBack={() => setView('home')} 
+          projectFilter={projectFilter}
+          setProjectFilter={setProjectFilter}
         />
       )}
       {view === 'space' && (

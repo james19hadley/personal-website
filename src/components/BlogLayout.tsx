@@ -1,30 +1,37 @@
 import { useState } from 'react';
 import { blogPosts, type BlogPost } from '../data/blog';
+import { projects } from '../data/projects';
 import { ArrowLeft, Clock, Calendar } from 'lucide-react';
 import { renderMarkdown } from './markdownHelpers';
 import './BlogLayout.css';
 
 interface BlogLayoutProps {
   onBack: () => void;
+  projectFilter?: string | null;
+  setProjectFilter?: (filter: string | null) => void;
 }
 
 /**
  * @component BlogLayout
  * @description Blog dashboard showing article cards with read times and pagination support.
  * Displays articles in a modal reader interface upon card selection.
- * @param {() => void} onBack - Navigation callback returning to the home screen
  */
-export const BlogLayout = ({ onBack }: BlogLayoutProps) => {
+export const BlogLayout = ({ onBack, projectFilter, setProjectFilter }: BlogLayoutProps) => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   
-  // Set to 1 for demonstration since we currently have 2 posts.
-  // In production, change this to 5 or 10.
-  const POSTS_PER_PAGE = 1; 
+  const POSTS_PER_PAGE = 5; 
   
-  const totalPages = Math.ceil(blogPosts.length / POSTS_PER_PAGE);
+  const filteredPosts = projectFilter
+    ? blogPosts.filter(post => post.projectId === projectFilter)
+    : blogPosts;
+
+  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
   const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-  const paginatedPosts = blogPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
+  const paginatedPosts = filteredPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
+
+  const activeProject = projects.find(p => p.id === projectFilter);
+  const projectTitle = activeProject ? activeProject.title : projectFilter;
 
   if (selectedPost) {
     return (
@@ -76,25 +83,43 @@ export const BlogLayout = ({ onBack }: BlogLayoutProps) => {
       <main className="layout-main">
         <h2 className="section-title">thought logs</h2>
 
-        <div className="blog-posts-list">
-          {paginatedPosts.map(post => (
-            <article 
-              key={post.id} 
-              className="blog-post-card glassmorphism"
-              onClick={() => setSelectedPost(post)}
+        {projectFilter && (
+          <div className="blog-filter-banner glassmorphism">
+            <span>
+              Showing logs for: <strong className="highlight-color">{projectTitle}</strong>
+            </span>
+            <button 
+              onClick={() => setProjectFilter && setProjectFilter(null)}
+              className="clear-filter-btn"
             >
-              <div className="post-meta-line">
-                <span className="post-cat">{post.category}</span>
-                <span className="post-date">{post.date}</span>
-              </div>
-              <h3 className="post-title">{post.title}</h3>
-              <p className="post-summary">{post.summary}</p>
-              <div className="post-footer">
-                <Clock size={12} />
-                <span>{post.readTime} read</span>
-              </div>
-            </article>
-          ))}
+              clear filter
+            </button>
+          </div>
+        )}
+
+        <div className="blog-posts-list">
+          {paginatedPosts.length > 0 ? (
+            paginatedPosts.map(post => (
+              <article 
+                key={post.id} 
+                className="blog-post-card glassmorphism"
+                onClick={() => setSelectedPost(post)}
+              >
+                <div className="post-meta-line">
+                  <span className="post-cat">{post.category}</span>
+                  <span className="post-date">{post.date}</span>
+                </div>
+                <h3 className="post-title">{post.title}</h3>
+                <p className="post-summary">{post.summary}</p>
+                <div className="post-footer">
+                  <Clock size={12} />
+                  <span>{post.readTime} read</span>
+                </div>
+              </article>
+            ))
+          ) : (
+            <p className="post-summary" style={{ textAlign: 'center', marginTop: '24px' }}>No blog entries found for this project yet.</p>
+          )}
         </div>
 
         {/* PAGINATION CONTROLS */}

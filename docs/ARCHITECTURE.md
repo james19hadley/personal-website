@@ -32,8 +32,6 @@ Integrates useVimNavigation hook to enable global Vim-style keyboard shortcuts.
 - **Source File**: [BlogLayout.tsx](file:///home/ging/prog/personal-website/src/components/BlogLayout.tsx)
 - **Description**: Blog dashboard showing article cards with read times and pagination support.
 Displays articles in a modal reader interface upon card selection.
-- **Props / Parameters**:
-  - `onBack` (`() => void`): Navigation callback returning to the home screen
 
 ### 🧩 `GameBoyConsole`
 - **Source File**: [GameBoyConsole.tsx](file:///home/ging/prog/personal-website/src/components/GameBoyConsole.tsx)
@@ -71,8 +69,6 @@ Listens for key events (ESC/Q/Ctrl+C) to exit and return control back to the hos
 - **Source File**: [ProjectsLayout.tsx](file:///home/ging/prog/personal-website/src/components/ProjectsLayout.tsx)
 - **Description**: Project list layout with classification filters. Houses lists of Handmade 🛠️ vs Vibe-coded ⚡ creations,
 with tech stacks and GitHub repository details. Card-level click handlers navigate to external URLs.
-- **Props / Parameters**:
-  - `onBack` (`() => void`): Navigation callback returning to the home screen
 
 ### 🧩 `SpaceLayout`
 - **Source File**: [SpaceLayout.tsx](file:///home/ging/prog/personal-website/src/components/SpaceLayout.tsx)
@@ -104,6 +100,11 @@ Supports cursor movement (h/j/k/l), deleting characters (x), writing changes (:w
   - `onSave` (`(content: string) => void`): Callback handler invoked to commit saved content back to the filesystem
   - `onClose` (`() => void`): Callback handler to dismiss editor and return focus back to the terminal prompt
 
+### 🧩 `VimHighlighter`
+- **Source File**: [VimHighlighter.tsx](file:///home/ging/prog/personal-website/src/components/VimHighlighter.tsx)
+- **Description**: Lightweight, regex-based code syntax highlighter for the Vim editor.
+Tokenizes and styles JavaScript/TypeScript keywords, strings, comments, numbers, and brackets.
+
 ---
 
 ## ⚓ Custom Hooks Registry
@@ -122,4 +123,4 @@ to navigate and confirm interactive items (buttons, links, selects, cards). Supp
 
 ---
 
-*Last generated: 2026-06-10T21:00:52.383Z*
+*Last generated: 2026-06-17T15:29:03.557Z*
