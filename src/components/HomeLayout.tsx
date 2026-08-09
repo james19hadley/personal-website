@@ -40,7 +40,7 @@ export const HomeLayout = ({ onNavigate, theme, toggleTheme }: HomeLayoutProps) 
 
       <main className="home-main">
         <div className="home-logo-wrapper">
-          <h1 className="home-logo">zijh</h1>
+          <h1 className="home-logo">ging</h1>
         </div>
 
         <p className="home-subtitle">
@@ -69,7 +69,7 @@ export const HomeLayout = ({ onNavigate, theme, toggleTheme }: HomeLayoutProps) 
 
       <footer className="home-footer">
         <a 
-          href="https://github.com/james19hadley" 
+          href="https://github.com/ging19freecss" 
           target="_blank" 
           rel="noopener noreferrer" 
           className="footer-link"

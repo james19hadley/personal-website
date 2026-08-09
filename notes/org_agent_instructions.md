@@ -88,12 +88,12 @@ You MUST update it whenever anything changes (milestones completed, priority ste
 
 ## 📬 Agent Mail Client (Nexus Messaging)
 
-To coordinate with other agents or the Master Agent, check and send messages using the mailing client script at [nexus/mail_client.py](file:///home/ging/Documents/stud/nexus/mail_client.py).
+To coordinate with other agents or the Master Agent, check and send messages using the mailing client script at [nexus/mail_client.py](../../nexus/mail_client.py).
 
 > [!IMPORTANT]
 > **CRITICAL: Platform `send_message` Tool Blocked for Cross-Project Messaging**
 > The platform-level `send_message` tool is strictly blocked by the system for any cross-project communication (it will throw a `cross-project messaging is not allowed` error).
-> You **MUST** use the local file-based mail client [nexus/mail_client.py](file:///home/ging/Documents/stud/nexus/mail_client.py) for all communication between different project directories.
+> You **MUST** use the local file-based mail client [nexus/mail_client.py](../../nexus/mail_client.py) for all communication between different project directories.
 
 ### Your Mail Address
 `project:<project_folder_name>/agent:<your_role>`
@@ -105,7 +105,7 @@ To coordinate with other agents or the Master Agent, check and send messages usi
    `python3 ~/Documents/stud/nexus/mail_client.py mark-read --agent project:<project_folder_name>/agent:<your_role> --msg-id <msg_id>`
 2. **Sending outbound requests**:
    `python3 ~/Documents/stud/nexus/mail_client.py send --to <recipient_address> --from-address project:<project_folder_name>/agent:<your_role> --subject "<subject>" --body "<body>"`
-3. **External Project Communication (extern)**: If your project directory is located outside the standard `/home/ging/Documents/stud/` directory (making it an **external** project, e.g. `/home/ging/prog/aistudio-outsourcer` or `/home/ging/prog/learn/languages/chinese`), you **MUST** send mail updates to the Master Agent (`nexus/agent:master`) *first* using `mail_client.py` before presenting any status updates to the user.
+3. **External Project Communication (extern)**: If your project directory is located outside the standard `~/Documents/stud/` directory (making it an **external** project, e.g. `~/prog/aistudio-outsourcer` or `~/prog/learn/languages/chinese`), you **MUST** send mail updates to the Master Agent (`nexus/agent:master`) *first* using `mail_client.py` before presenting any status updates to the user.
 
 
 ---

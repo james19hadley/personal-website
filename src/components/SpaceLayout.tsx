@@ -19,7 +19,7 @@ export const SpaceLayout = ({ onBack }: SpaceLayoutProps) => {
           <ArrowLeft size={16} />
           <span>back</span>
         </button>
-        <span className="layout-logo">zijh</span>
+        <span className="layout-logo">ging</span>
       </header>
 
       <main className="layout-main">

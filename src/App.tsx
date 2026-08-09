@@ -34,7 +34,7 @@ function App() {
     if (['projects', 'blog', 'space', 'terminal', 'gameboy'].includes(baseView)) {
       return baseView as any;
     }
-    const saved = localStorage.getItem('zijh-view');
+    const saved = localStorage.getItem('ging-view');
     if (saved === 'projects' || saved === 'blog' || saved === 'space' || saved === 'terminal') {
       return saved as any;
     }
@@ -42,7 +42,7 @@ function App() {
   });
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    const saved = localStorage.getItem('zijh-theme');
+    const saved = localStorage.getItem('ging-theme');
     return (saved === 'light' ? 'light' : 'dark');
   });
 
@@ -91,16 +91,14 @@ function App() {
       output: (
         <div className="terminal-welcome">
           <pre className="welcome-ascii">
-{` ███████╗██╗██╗██╗  ██╗
- ╚══███╔╝██║██║██║  ██║
-   ███╔╝ ██║██║███████║
-  ███╔╝  ██║██║██╔══██║
- ███████╗██║██║██║  ██║
- ╚══════╝╚═╝██║╚═╝  ╚═╝
-         ╚████║       
-          ╚═══╝`}
+{` ██████╗ ██╗███╗   ██╗ ██████╗ 
+██╔════╝ ██║████╗  ██║██╔════╝ 
+██║  ███╗██║██╔██╗ ██║██║  ███╗
+██║   ██║██║██║╚██╗██║██║   ██║
+╚██████╔╝██║██║ ╚████║╚██████╔╝
+ ╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝ `}
           </pre>
-          <p className="welcome-text">Welcome to ZIJH Shell (v1.0.0)</p>
+          <p className="welcome-text">Welcome to GING Shell (v1.0.0)</p>
           <p className="welcome-sub">Type <span className="highlight">help</span> to view available commands. Click <span className="highlight">gui</span> to morph back to grid.</p>
         </div>
       )
@@ -115,7 +113,7 @@ function App() {
 
         // Restore filesystem from localStorage if it exists
         try {
-          const savedState = localStorage.getItem('zijh-fs-state');
+          const savedState = localStorage.getItem('ging-fs-state');
           if (savedState) {
             const items = JSON.parse(savedState);
             if (Array.isArray(items)) {
@@ -149,7 +147,7 @@ function App() {
       setPrevNonTermView(view);
     }
     if (view !== 'gameboy') {
-      localStorage.setItem('zijh-view', view);
+      localStorage.setItem('ging-view', view);
     }
   }, [view]);
   // Prevent mobile browser keyboard scrolling and notch cuts
@@ -180,7 +178,7 @@ function App() {
   // Sync theme attribute to HTML tag
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('zijh-theme', theme);
+    localStorage.setItem('ging-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
